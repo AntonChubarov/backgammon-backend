@@ -3,9 +3,9 @@ package dal
 import (
 	"backgammon/config"
 	"fmt"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // shadow import
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // shadow import
 	"log"
 )
 
@@ -13,11 +13,14 @@ type DatabaseConnector struct {
 	Database *sqlx.DB
 }
 
-func NewDatabaseConnector(sConfig *config.ServerConfig) *DatabaseConnector {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		sConfig.Database.Host, sConfig.Database.Port, sConfig.Database.User,
-		sConfig.Database.Password, sConfig.Database.Name)
+func NewDatabaseConnector(config *config.ServerConfig) *DatabaseConnector {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		config.Database.Host,
+		config.Database.Port,
+		config.Database.User,
+		config.Database.Password,
+		config.Database.Name,
+	)
 
 	db, err := sqlx.Connect("postgres", psqlInfo)
 	if err != nil {

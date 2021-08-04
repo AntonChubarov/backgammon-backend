@@ -4,20 +4,18 @@ import (
 	"backgammon/config"
 	"backgammon/infrastructure/dal"
 	"backgammon/infrastructure/dal/migrations"
+	"backgammon/infrastructure/httphandlers"
+	"backgammon/infrastructure/websockethandler"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	fmt.Println("Hello backgammon!")
-
 	config := config.NewServerConfig()
 
-	fmt.Println(config)
-
 	database := dal.NewDatabaseConnector(config)
-
 	defer database.CloseDatabaseConnection()
 
 	s:=bindata.Resource(migrations.AssetNames(), migrations.Asset)
@@ -27,6 +25,16 @@ func main() {
 		config.Database.Host,
 		config.Database.Port,
 		config.Database.Name), s)
+
+	webSocket := websockethandler.NewWebSocketHandler()
+	userRegistrator := httphandlers.NewUserRegistrator()
+
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {return nil})
+	e.GET("/ws", webSocket.Handle)
+	e.POST("/register", userRegistrator.Handle)
+
+	e.Logger.Fatal(e.Start(config.Host.ServerStartPort))
 }
 
 func runDBMigrate(dsn string, source *bindata.AssetSource)  {
