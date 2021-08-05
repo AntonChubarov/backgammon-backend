@@ -1,9 +1,12 @@
 package httphandlers
 
-import "github.com/labstack/echo/v4"
+import (
+	"backgammon/app"
+	"github.com/labstack/echo/v4"
+)
 
 type UserRegistrator struct {
-	
+	service app.UserRegistrationService
 }
 
 func NewUserRegistrator() *UserRegistrator {

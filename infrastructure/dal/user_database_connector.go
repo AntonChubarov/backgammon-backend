@@ -2,6 +2,7 @@ package dal
 
 import (
 	"backgammon/config"
+	"backgammon/domain"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" // shadow import
 	"github.com/jmoiron/sqlx"
@@ -42,4 +43,28 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (d *DatabaseConnector) AddNewUser(data domain.UserData) error {
+	userDTO := UserToDatabase(data)
+
+	_, err := d.Database.NamedExec("insert into users (login, password) values (:login, :password)",
+		userDTO)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DatabaseConnector) IsUserExist(data domain.UserData) (bool, error) {
+	panic("implement me")
+}
+
+func (d *DatabaseConnector) UpdateUser(oldData domain.UserData, newData domain.UserData) error {
+	panic("implement me")
+}
+
+func (d *DatabaseConnector) RemoveUser(data domain.UserData) error {
+	panic("implement me")
 }

@@ -1,8 +1,8 @@
 package domain
 
 type UserStorage interface {
-	AddNewUser(info UserInfo) error
-	CheckUser(info UserInfo) error
-	UpdateUser(oldInfo UserInfo, newInfo UserInfo) error
-	RemoveUser(info UserInfo) error
+	AddNewUser(data UserData) error
+	IsUserExist(data UserData) (bool, error)
+	UpdateUser(oldData UserData, newData UserData) error
+	RemoveUser(data UserData) error
 }
