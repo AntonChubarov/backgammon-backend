@@ -1,28 +1,31 @@
-package app
+package board
 
 import (
 	"crypto/rand"
 	"math/big"
 )
 
-type dice struct {
-
+type DiceState struct {
+	Dice1 int
+	Dice2 int
 }
 
-func newDice() *dice {
-	return &dice{}
-}
-
-func (d *dice) RollTheDice() []int {
-	d1 := randomInt(1, 6)
-	d2 := randomInt(1, 6)
-	if d1 == d2 {
-		return []int{d1, d2, d1, d2}
+func (d *DiceState) IsEqualTo(d2 *DiceState) bool {
+	if (d.Dice1==d2.Dice1 && d.Dice2==d2.Dice2) ||
+		 (d.Dice1==d2.Dice2 && d.Dice2==d2.Dice1) {
+		return  true
 	}
-	return []int{d1, d2}
+	return false
 }
 
-func (d *dice) RollOneDice() int {
+func RollDice() *DiceState {
+	return &DiceState{
+		Dice1: RollOneDice(),
+		Dice2: RollOneDice(),
+	}
+}
+
+func RollOneDice() int {
 	return randomInt(1, 6)
 }
 
@@ -34,3 +37,15 @@ func randomInt(min, max int) int {
 	n := nBig.Int64()
 	return min + int(n)
 }
+//func (d *dice) RollTheDice() []int {
+//	d1 := randomInt(1, 6)
+//	d2 := randomInt(1, 6)
+//	if d1 == d2 {
+//		return []int{d1, d2, d1, d2}
+//	}
+//	return []int{d1, d2}
+//
+//
+//}
+
+
