@@ -51,6 +51,7 @@ func (d *DatabaseConnector) AddNewUser(data domain.UserData) error {
 	_, err := d.Database.NamedExec("insert into users (login, password) values (:login, :password)",
 		userDTO)
 	if err != nil {
+		log.Println("In dal.AddNewUser", err)
 		return err
 	}
 
@@ -58,7 +59,18 @@ func (d *DatabaseConnector) AddNewUser(data domain.UserData) error {
 }
 
 func (d *DatabaseConnector) IsUserExist(data domain.UserData) (bool, error) {
-	panic("implement me")
+	login := data.Login
+	var users []UserDBDTO
+
+	err := d.Database.Select(&users, "select login, password from users where login = $1", login)
+	if err != nil {
+		log.Println("In dal.IsUserExist", err)
+		return false, err
+	}
+	if users != nil {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (d *DatabaseConnector) UpdateUser(oldData domain.UserData, newData domain.UserData) error {

@@ -1,6 +1,9 @@
 package app
 
-import "backgammon/domain"
+import (
+	"backgammon/domain"
+	"log"
+)
 
 type UserRegistrationService struct {
 	storage domain.UserStorage
@@ -15,17 +18,20 @@ func (urs *UserRegistrationService) RegisterNewUser(data domain.UserData) error 
 	if userExist {
 		return domain.UserExistError
 	}
-	if err != nil {
-		return err
-	}
+	//if err != nil {
+	//	log.Println("In app.RegisterNewUser", err)
+	//	return err
+	//}
 
 	data.Password, err = HashPassword(data.Password)
 	if err != nil {
+		log.Println("In app.RegisterNewUser", err)
 		return err
 	}
 
 	err = urs.storage.AddNewUser(data)
 	if err != nil {
+		log.Println("In app.RegisterNewUser", err)
 		return err
 	}
 

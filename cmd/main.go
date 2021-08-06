@@ -1,11 +1,11 @@
 package main
 
 import (
+	"backgammon/app"
 	"backgammon/config"
 	"backgammon/infrastructure/dal"
 	"backgammon/infrastructure/dal/migrations"
-	"backgammon/infrastructure/httphandlers"
-	"backgammon/infrastructure/websockethandler"
+	"backgammon/infrastructure/handlers"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	bindata "github.com/golang-migrate/migrate/v4/source/go_bindata"
@@ -13,28 +13,32 @@ import (
 )
 
 func main() {
-	config := config.NewServerConfig()
+	serverConfig := config.NewServerConfig()
 
-	database := dal.NewDatabaseConnector(config)
+	database := dal.NewDatabaseConnector(serverConfig)
 	defer database.CloseDatabaseConnection()
 
 	s:=bindata.Resource(migrations.AssetNames(), migrations.Asset)
 	runDBMigrate(fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		config.Database.User,
-		config.Database.Password,
-		config.Database.Host,
-		config.Database.Port,
-		config.Database.Name), s)
+		serverConfig.Database.User,
+		serverConfig.Database.Password,
+		serverConfig.Database.Host,
+		serverConfig.Database.Port,
+		serverConfig.Database.Name), s)
 
-	webSocket := websockethandler.NewWebSocketHandler()
-	userRegistrator := httphandlers.NewUserRegistrator()
+	storage := dal.NewDatabaseConnector(serverConfig)
+
+	userRegistrationService := app.NewUserRegistrationService(storage)
+	userRegistrator := handlers.NewUserRegistrator(userRegistrationService)
+
+	webSocket := handlers.NewWebSocketHandler()
 
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {return nil})
 	e.GET("/ws", webSocket.Handle)
 	e.POST("/register", userRegistrator.Handle)
 
-	e.Logger.Fatal(e.Start(config.Host.ServerStartPort))
+	e.Logger.Fatal(e.Start(serverConfig.Host.ServerStartPort))
 }
 
 func runDBMigrate(dsn string, source *bindata.AssetSource)  {

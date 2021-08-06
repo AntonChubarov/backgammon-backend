@@ -9,7 +9,7 @@ This backend is being developed in Golang using such technologies as:
 </ul>
 
 First you need to configure postgreSQL database as described below.
-Or you can create your own user and database and edit .env file corespondently.
+Or you can create your own users and database and edit .env file corespondently.
 
 <pre><code>
 CREATE ROLE backgammonadmin WITH
