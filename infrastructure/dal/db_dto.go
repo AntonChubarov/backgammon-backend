@@ -1,6 +1,7 @@
 package dal
 
 type UserDBDTO struct {
-	Login string `db:"login"`
-	PasswordHash string `db:"password"`
+	Id string `db:"userUUID"`
+	Login string `db:"userlogin"`
+	PasswordHash string `db:"userpassword"`
 }
