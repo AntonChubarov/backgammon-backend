@@ -1,14 +1,16 @@
 create table users
 (
-    id serial,
-    login varchar not null,
-    password varchar not null
+    userid serial,
+    userlogin varchar not null,
+    userpassword varchar not null
 );
 
-create unique index users_login_uindex
-    on users (login);
+create unique index users_userlogin_uindex
+    on users (userlogin);
 
 alter table users
     add constraint users_pk
-        primary key (id);
+        primary key (userid);
 
+insert into users (userlogin, userpassword) values
+    ('admin1', 'admin1password'), ('admin2', 'admin2password');

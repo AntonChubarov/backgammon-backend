@@ -4,15 +4,17 @@ import (
 	"backgammon/domain"
 )
 
-func UserToDatabase(user domain.UserData) UserDBDTO {
+func UserDataToUserDBDTO(user domain.UserData) UserDBDTO {
 	return UserDBDTO{
+		Id: user.UUID,
 		Login:        user.Login,
 		PasswordHash: user.Password,
 	}
 }
 
-func UserFromDatabase(user UserDBDTO) domain.UserData {
+func UserDBDTOToUserData(user UserDBDTO) domain.UserData {
 	return domain.UserData{
+		UUID: user.Id,
 		Login: user.Login,
 		Password: user.PasswordHash,
 	}

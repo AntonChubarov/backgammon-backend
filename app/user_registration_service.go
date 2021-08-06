@@ -18,10 +18,8 @@ func (urs *UserRegistrationService) RegisterNewUser(data domain.UserData) error 
 	if userExist {
 		return domain.UserExistError
 	}
-	//if err != nil {
-	//	log.Println("In app.RegisterNewUser", err)
-	//	return err
-	//}
+
+	data.UUID = GenerateUUID()
 
 	data.Password, err = HashPassword(data.Password)
 	if err != nil {
