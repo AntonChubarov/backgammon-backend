@@ -7,6 +7,15 @@ const (
 	_
 	White
 )
+type MoveKind int
+
+const (
+	_ MoveKind = iota
+	Movement
+	Removing
+)
+
+
 
 type Hole struct {
 	StickColor // -1 is black color, 1 is white color
@@ -19,6 +28,7 @@ type Turn struct {
 }
 
 type Move struct {
+	MoveKind
 	From int // should be an integer between 1 and 24
 	Steps int // which way we should determine stick remove?
 }
@@ -27,4 +37,5 @@ type Board struct {
 	CurrentTurnColor StickColor
 	Holes [24]Hole
 }
+
 
