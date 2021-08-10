@@ -28,15 +28,16 @@ func main() {
 
 	storage := dal.NewDatabaseConnector(serverConfig)
 
-	userRegistrationService := app.NewUserRegistrationService(storage)
-	userRegistrator := handlers.NewUserRegistrator(userRegistrationService)
+	userAuthService := app.NewUserAuthService(storage)
+	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 
 	webSocket := handlers.NewWebSocketHandler()
 
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {return nil})
 	e.GET("/ws", webSocket.Handle)
-	e.POST("/register", userRegistrator.Handle)
+	e.POST("/register", userAuthHandler.Register)
+	e.POST("/login", userAuthHandler.Login)
 
 	e.Logger.Fatal(e.Start(serverConfig.Host.ServerStartPort))
 }

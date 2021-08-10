@@ -1,6 +1,6 @@
 package handlers
 
-type UserRegistrationRequestDTO struct {
+type UserAuthRequestDTO struct {
 	Login string `json:"login"`
 	Password string `json:"password"`
 }

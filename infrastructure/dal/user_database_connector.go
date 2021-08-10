@@ -58,8 +58,7 @@ func (d *DatabaseConnector) AddNewUser(data domain.UserData) error {
 	return nil
 }
 
-func (d *DatabaseConnector) IsUserExist(data domain.UserData) (bool, error) {
-	login := data.Login
+func (d *DatabaseConnector) IsUserExist(login string) (bool, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select userlogin, userpassword from users where userlogin = $1", login)
@@ -71,6 +70,20 @@ func (d *DatabaseConnector) IsUserExist(data domain.UserData) (bool, error) {
 		return true, nil
 	}
 	return false, nil
+}
+
+func (d *DatabaseConnector) GetUserByLogin(login string) (domain.UserData, error) {
+	var users []UserDBDTO
+
+	err := d.Database.Select(&users, "select userlogin, userpassword from users where userlogin = $1", login)
+	if err != nil {
+		log.Println("In dal.etUserByLogin", err)
+		return domain.UserData{}, err
+	}
+	if users != nil && len(users) == 1 {
+		return UserDBDTOToUserData(users[0]), nil
+	}
+	return domain.UserData{}, domain.InvalidLogin
 }
 
 func (d *DatabaseConnector) UpdateUser(oldData domain.UserData, newData domain.UserData) error {
