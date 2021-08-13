@@ -28,7 +28,7 @@ func main() {
 
 	storage := dal.NewDatabaseConnector(serverConfig)
 
-	userAuthService := app.NewUserAuthService(storage)
+	userAuthService := app.NewUserAuthService(storage, serverConfig)
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 
 	webSocket := handlers.NewWebSocketHandler()

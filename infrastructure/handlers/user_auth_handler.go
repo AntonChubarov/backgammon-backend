@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"backgammon/app"
-	"backgammon/domain"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
@@ -29,7 +28,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	user := ConvertUserRegDataToUser(request)
 	err = uah.service.RegisterNewUser(user)
 
-	if err == domain.UserExistError {
+	if err == app.UserExistError {
 		errStr := err.Error()
 		return c.JSON(http.StatusConflict, UserRegistrationResponseDTO{Message: errStr})
 	}
@@ -57,7 +56,7 @@ func (uah *UserAuthHandler) Login(c echo.Context) error {
 	var token string
 	token, err = uah.service.AuthorizeUser(user)
 
-	if err == domain.InvalidLogin || err == domain.InvalidPassword {
+	if err == app.InvalidLogin || err == app.InvalidPassword {
 		errStr := err.Error()
 		return c.JSON(http.StatusUnauthorized, UserAuthorizationResponseDTO{Message: errStr})
 	}

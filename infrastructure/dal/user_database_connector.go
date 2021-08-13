@@ -1,6 +1,7 @@
 package dal
 
 import (
+	"backgammon/app"
 	"backgammon/config"
 	"backgammon/domain"
 	"fmt"
@@ -83,7 +84,10 @@ func (d *DatabaseConnector) GetUserByLogin(login string) (domain.UserData, error
 	if users != nil && len(users) == 1 {
 		return UserDBDTOToUserData(users[0]), nil
 	}
-	return domain.UserData{}, domain.InvalidLogin
+	if len(users) > 1 {
+		return domain.UserData{}, MoreThanOneLoginRecordError
+	}
+	return domain.UserData{}, app.InvalidLogin
 }
 
 func (d *DatabaseConnector) UpdateUser(oldData domain.UserData, newData domain.UserData) error {
