@@ -9,6 +9,7 @@ import (
 type ServerConfig struct {
 	Host HostConfig
 	Database DBConfig
+	Token TokenConfig
 }
 
 type HostConfig struct {
@@ -22,6 +23,11 @@ type DBConfig struct {
 	User     string `env:"DB_USER"`
 	Password string `env:"DB_PASSWORD"`
 	Name     string `env:"DB_NAME"`
+}
+
+type TokenConfig struct {
+	TokenLength int `env:"TOKEN_LENGTH"`
+	TokenSymbols string `env:"TOKEN_SYMBOLS"`
 }
 
 func NewServerConfig() *ServerConfig {
@@ -39,9 +45,16 @@ func NewServerConfig() *ServerConfig {
 		log.Println(err)
 	}
 
+	var tokenConfig TokenConfig
+	err = getConfig(&tokenConfig)
+	if err != nil {
+		log.Println(err)
+	}
+
 	return &ServerConfig{
 		Host: hostConfig,
 		Database: dbConfig,
+		Token: tokenConfig,
 	}
 }
 
