@@ -78,7 +78,7 @@ func (d *DatabaseConnector) GetUserByLogin(login string) (domain.UserData, error
 
 	err := d.Database.Select(&users, "select userlogin, userpassword from users where userlogin = $1", login)
 	if err != nil {
-		log.Println("In dal.etUserByLogin", err)
+		log.Println("In dal.GetUserByLogin", err)
 		return domain.UserData{}, err
 	}
 	if users != nil && len(users) == 1 {
