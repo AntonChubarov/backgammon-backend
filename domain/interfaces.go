@@ -8,8 +8,9 @@ type UserDataStorage interface {
 	RemoveUser(data UserAuthData) error
 }
 
-type UserSessionStorage interface {
-	AddNewUser(data UserGameData)
+type SessionStorage interface {
+	AddNewUser(data UserSessionData)
 	UpdateTokenExpiryTime(token string)
 	DeleteUserByToken(token string)
+	GetTokenByUUID(uuid string) (token string, wasFound bool)
 }

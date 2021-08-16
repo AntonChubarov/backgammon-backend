@@ -8,11 +8,12 @@ import (
 
 type UserAuthService struct {
 	storage domain.UserDataStorage
+	mainSessionStorage domain.SessionStorage
 	config *config.ServerConfig
 }
 
-func NewUserAuthService(storage domain.UserDataStorage, config *config.ServerConfig) *UserAuthService {
-	return &UserAuthService{storage: storage, config: config}
+func NewUserAuthService(storage domain.UserDataStorage, mainSessionStorage domain.SessionStorage, config *config.ServerConfig) *UserAuthService {
+	return &UserAuthService{storage: storage, mainSessionStorage: mainSessionStorage, config: config}
 }
 
 func (uas *UserAuthService) RegisterNewUser(data domain.UserAuthData) error {
@@ -46,6 +47,7 @@ func (uas *UserAuthService) AuthorizeUser(data domain.UserAuthData) (token strin
 	if err != nil {
 		return
 	}
+
 	var passwordHash string
 	passwordHash, err = HashPassword(data.Password)
 	if err != nil {
@@ -57,6 +59,12 @@ func (uas *UserAuthService) AuthorizeUser(data domain.UserAuthData) (token strin
 		return
 	}
 
+	var wasFound bool
+	token, wasFound = uas.mainSessionStorage.GetTokenByUUID(user.UUID)
+	if wasFound {
+		return
+	}
 	token = GenerateToken(uas.config.Token.TokenLength, uas.config.Token.TokenSymbols)
+	uas.mainSessionStorage.AddNewUser(domain.UserSessionData{Token: token, UserUUID: user.UUID})
 	return
 }
