@@ -7,15 +7,15 @@ import (
 )
 
 type UserAuthService struct {
-	storage domain.UserStorage
+	storage domain.UserDataStorage
 	config *config.ServerConfig
 }
 
-func NewUserAuthService(storage domain.UserStorage, config *config.ServerConfig) *UserAuthService {
+func NewUserAuthService(storage domain.UserDataStorage, config *config.ServerConfig) *UserAuthService {
 	return &UserAuthService{storage: storage, config: config}
 }
 
-func (uas *UserAuthService) RegisterNewUser(data domain.UserData) error {
+func (uas *UserAuthService) RegisterNewUser(data domain.UserAuthData) error {
 	userExist, err := uas.storage.IsUserExist(data.Login)
 	if userExist {
 		return UserExistError
@@ -38,9 +38,9 @@ func (uas *UserAuthService) RegisterNewUser(data domain.UserData) error {
 	return nil
 }
 
-func (uas *UserAuthService) AuthorizeUser(data domain.UserData) (token string, err error) {
+func (uas *UserAuthService) AuthorizeUser(data domain.UserAuthData) (token string, err error) {
 	token = ""
-	var user domain.UserData
+	var user domain.UserAuthData
 
 	user, err = uas.storage.GetUserByLogin(data.Login)
 	if err != nil {
