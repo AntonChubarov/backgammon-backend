@@ -1,7 +1,7 @@
 package dal
 
 type UserDBDTO struct {
-	Id string `db:"userUUID"`
+	UUID  string `db:"useruuid"`
 	Login string `db:"userlogin"`
 	PasswordHash string `db:"userpassword"`
 }
