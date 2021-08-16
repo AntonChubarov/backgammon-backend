@@ -13,6 +13,7 @@ const (
 	_ MoveKind = iota
 	Movement
 	Removing
+	Surrender = 999
 )
 
 
@@ -25,6 +26,7 @@ type Hole struct {
 type Turn struct {
 	StickColor //-1 is black color, 1 is white color
 	Moves []Move   // can contain from 0 to 4 moves
+	TurnNumber int
 }
 
 type Move struct {
