@@ -6,7 +6,7 @@ import (
 
 func UserDataToUserDBDTO(user domain.UserAuthData) UserDBDTO {
 	return UserDBDTO{
-		Id: user.UUID,
+		UUID:         user.UUID,
 		Login:        user.Login,
 		PasswordHash: user.Password,
 	}
@@ -14,7 +14,7 @@ func UserDataToUserDBDTO(user domain.UserAuthData) UserDBDTO {
 
 func UserDBDTOToUserData(user UserDBDTO) domain.UserAuthData {
 	return domain.UserAuthData{
-		UUID: user.Id,
+		UUID: user.UUID,
 		Login: user.Login,
 		Password: user.PasswordHash,
 	}

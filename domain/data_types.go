@@ -12,7 +12,7 @@ type UserAuthData struct {
 	Token string
 }
 
-type UserGameData struct {
+type UserSessionData struct {
 	Token string
 	ExpiryTime time.Time
 	UserUUID string

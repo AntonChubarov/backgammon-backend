@@ -41,13 +41,13 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserRegistrationResponseDTO{Message: "Successfully registered"})
 }
 
-func (uah *UserAuthHandler) Login(c echo.Context) error {
+func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var err error
 	var request UserAuthRequestDTO
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Login", err)
+		log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return echo.ErrBadRequest
 	}
 
@@ -62,7 +62,7 @@ func (uah *UserAuthHandler) Login(c echo.Context) error {
 	}
 
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Login", err)
+		log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return c.JSON(http.StatusInternalServerError, UserAuthorizationResponseDTO{Message: err.Error()})
 	}
 
