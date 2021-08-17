@@ -28,7 +28,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	user := ConvertUserRegDataToUser(request)
 	err = uah.service.RegisterNewUser(user)
 
-	if err == app.UserExistError {
+	if err == app.ErrorUserExists {
 		errStr := err.Error()
 		return c.JSON(http.StatusConflict, UserRegistrationResponseDTO{Message: errStr})
 	}
@@ -56,7 +56,7 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var token string
 	token, err = uah.service.AuthorizeUser(user)
 
-	if err == app.InvalidLogin || err == app.InvalidPassword {
+	if err == app.ErrorInvalidLogin || err == app.ErrorInvalidPassword {
 		errStr := err.Error()
 		return c.JSON(http.StatusUnauthorized, UserAuthorizationResponseDTO{Message: errStr})
 	}
