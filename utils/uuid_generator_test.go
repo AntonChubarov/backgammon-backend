@@ -1,4 +1,4 @@
-package app
+package utils
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -31,18 +31,10 @@ func TestUUIDGenerationUniqueness(t *testing.T) {
 	for i := 0; i < n; i++ {
 		uuid = GenerateUUID()
 
-		isUnique=!contains(&uuids, uuid)
+		isUnique=!Contains(&uuids, uuid)
 
 		assert.True(t, isUnique)
 		uuids=append(uuids, uuid)
 	}
 }
 
-func contains(s *[]string, e string) bool {
-	for i := range *s {
-		if (*s)[i] == e {
-			return true
-		}
-	}
-	return false
-}

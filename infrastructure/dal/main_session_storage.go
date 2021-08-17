@@ -1,7 +1,7 @@
 package dal
 
 import (
-	"backgammon/domain/auth"
+	"backgammon/app/auth"
 	"log"
 	"time"
 )
