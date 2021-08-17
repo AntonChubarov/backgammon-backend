@@ -1,16 +1,9 @@
-package domain
+package auth
 
 import (
 	"github.com/gorilla/websocket"
 	"time"
 )
-
-type UserAuthData struct {
-	UUID string
-	Login string
-	Password string
-	Token string
-}
 
 type UserSessionData struct {
 	Token string
@@ -18,3 +11,6 @@ type UserSessionData struct {
 	UserUUID string
 	WebSocket websocket.Conn
 }
+
+
+
