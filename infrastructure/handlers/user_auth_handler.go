@@ -28,7 +28,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	user := ConvertUserRegDataToUser(request)
 	err = uah.service.RegisterNewUser(user)
 
-	if err == app.UserExistError {
+	if err == app.ErrorUserExists {
 		errStr := err.Error()
 		return c.JSON(http.StatusConflict, UserRegistrationResponseDTO{Message: errStr})
 	}
@@ -41,13 +41,13 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserRegistrationResponseDTO{Message: "Successfully registered"})
 }
 
-func (uah *UserAuthHandler) Login(c echo.Context) error {
+func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var err error
 	var request UserAuthRequestDTO
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Login", err)
+		log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return echo.ErrBadRequest
 	}
 
@@ -56,13 +56,13 @@ func (uah *UserAuthHandler) Login(c echo.Context) error {
 	var token string
 	token, err = uah.service.AuthorizeUser(user)
 
-	if err == app.InvalidLogin || err == app.InvalidPassword {
+	if err == app.ErrorInvalidLogin || err == app.ErrorInvalidPassword {
 		errStr := err.Error()
 		return c.JSON(http.StatusUnauthorized, UserAuthorizationResponseDTO{Message: errStr})
 	}
 
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Login", err)
+		log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return c.JSON(http.StatusInternalServerError, UserAuthorizationResponseDTO{Message: err.Error()})
 	}
 

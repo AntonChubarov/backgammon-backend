@@ -1,9 +1,16 @@
 package domain
 
-type UserStorage interface {
-	AddNewUser(data UserData) error
+type UserDataStorage interface {
+	AddNewUser(data UserAuthData) error
 	IsUserExist(login string) (bool, error)
-	GetUserByLogin(login string) (UserData, error)
-	UpdateUser(oldData UserData, newData UserData) error
-	RemoveUser(data UserData) error
+	GetUserByLogin(login string) (UserAuthData, error)
+	UpdateUser(oldData UserAuthData, newData UserAuthData) error
+	RemoveUser(data UserAuthData) error
+}
+
+type SessionStorage interface {
+	AddNewUser(data UserSessionData)
+	UpdateTokenExpiryTime(token string)
+	DeleteUserByToken(token string)
+	GetTokenByUUID(uuid string) (token string, wasFound bool)
 }

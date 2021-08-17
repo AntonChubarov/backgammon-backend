@@ -4,8 +4,8 @@ import (
 	"backgammon/domain"
 )
 
-func ConvertUserRegDataToUser(user UserAuthRequestDTO) domain.UserData {
-	return domain.UserData{
+func ConvertUserRegDataToUser(user UserAuthRequestDTO) domain.UserAuthData {
+	return domain.UserAuthData{
 		Login: user.Login,
 		Password: user.Password,
 		Token: "",
