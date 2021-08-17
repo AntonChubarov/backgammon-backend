@@ -2,6 +2,6 @@ package app
 
 import "fmt"
 
-var UserExistError = fmt.Errorf("user with this login already exists")
-var InvalidLogin = fmt.Errorf("user with this login is not registered")
-var InvalidPassword = fmt.Errorf("invalid password")
+var ErrorUserExists = fmt.Errorf("user with this login already exists")
+var ErrorInvalidLogin = fmt.Errorf("user with this login is not registered")
+var ErrorInvalidPassword = fmt.Errorf("invalid password")

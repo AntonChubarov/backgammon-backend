@@ -87,7 +87,7 @@ func (d *DatabaseConnector) GetUserByLogin(login string) (domain.UserAuthData, e
 	if len(users) > 1 {
 		return domain.UserAuthData{}, MoreThanOneLoginRecordError
 	}
-	return domain.UserAuthData{}, app.InvalidLogin
+	return domain.UserAuthData{}, app.ErrorInvalidLogin
 }
 
 func (d *DatabaseConnector) UpdateUser(oldData domain.UserAuthData, newData domain.UserAuthData) error {
