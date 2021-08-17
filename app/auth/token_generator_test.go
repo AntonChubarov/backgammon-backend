@@ -1,6 +1,8 @@
-package app
+package auth
 
 import (
+	"backgammon/config"
+	"backgammon/utils"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -8,16 +10,21 @@ import (
 	"testing"
 )
 
+var conf = config.ServerConfig{
+		Token: config.TokenConfig{
+			TokenLength: 16,
+			TokenSymbols: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"},
+			}
+var generator = NewTokenGeneratorFlex(&conf)
+
 func TestGenerateToken(t *testing.T) {
-	tokenLength := 16
-	tokenSymbols := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	n := 10000
 	var token string
-	tokenRegex := fmt.Sprintf("^[a-zA-Z0-9]{%d}$", tokenLength)
+	tokenRegex := fmt.Sprintf("^[a-zA-Z0-9]{%d}$", conf.Token.TokenLength)
 
 	for i := 0; i < n; i++ {
-		token = GenerateToken(tokenLength, tokenSymbols)
+		token= generator.GenerateToken()
 		isValid, err := regexp.MatchString(tokenRegex, token)
 		if err != nil {
 			log.Println(err)
@@ -27,8 +34,6 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestTokenGenerationUniqueness(t *testing.T) {
-	tokenLength := 16
-	tokenSymbols := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	n := 10000
 	var token string
@@ -36,9 +41,9 @@ func TestTokenGenerationUniqueness(t *testing.T) {
 	tokens := make([]string, 0, n)
 
 	for i := 0; i < n; i++ {
-		token = GenerateToken(tokenLength, tokenSymbols)
+		token = generator.GenerateToken()
 
-		isUnique = !contains(&tokens, token)
+		isUnique = !utils.Contains(&tokens, token)
 
 		assert.True(t, isUnique)
 		tokens = append(tokens, token)
