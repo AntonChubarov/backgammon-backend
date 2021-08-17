@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backgammon/app"
+	"backgammon/app/auth"
 	"backgammon/config"
 	"backgammon/infrastructure/dal"
 	"backgammon/infrastructure/dal/migrations"
@@ -29,7 +29,7 @@ func main() {
 	storage := dal.NewDatabaseConnector(serverConfig)
 	mainSessionStorage := dal.NewMainSessionStorage()
 
-	userAuthService := app.NewUserAuthService(storage, mainSessionStorage, serverConfig)
+	userAuthService := auth.NewUserAuthService(storage, mainSessionStorage, serverConfig)
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 
 	webSocket := handlers.NewWebSocketHandler()

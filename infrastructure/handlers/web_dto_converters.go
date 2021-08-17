@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"backgammon/domain"
+	"backgammon/domain/auth"
 )
 
-func ConvertUserRegDataToUser(user UserAuthRequestDTO) domain.UserAuthData {
-	return domain.UserAuthData{
+func ConvertUserRegDataToUser(user UserAuthRequestDTO) auth.UserAuthData {
+	return auth.UserAuthData{
 		Login: user.Login,
 		Password: user.Password,
 		Token: "",
