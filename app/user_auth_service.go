@@ -19,7 +19,7 @@ func NewUserAuthService(storage domain.UserDataStorage, mainSessionStorage domai
 func (uas *UserAuthService) RegisterNewUser(data domain.UserAuthData) error {
 	userExist, err := uas.storage.IsUserExist(data.Login)
 	if userExist {
-		return UserExistError
+		return ErrorUserExists
 	}
 
 	data.UUID = GenerateUUID()
@@ -55,7 +55,7 @@ func (uas *UserAuthService) AuthorizeUser(data domain.UserAuthData) (token strin
 	}
 
 	if passwordHash != user.Password {
-		err = InvalidPassword
+		err = ErrorInvalidPassword
 		return
 	}
 
