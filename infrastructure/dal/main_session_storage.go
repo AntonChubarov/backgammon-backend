@@ -1,17 +1,17 @@
 package dal
 
 import (
-	"backgammon/domain"
+	"backgammon/domain/auth"
 	"log"
 	"time"
 )
 
 type MainSessionStorage struct {
-	storage map[string]domain.UserSessionData
+	storage map[string]auth.UserSessionData
 }
 
 func NewMainSessionStorage() *MainSessionStorage {
-	storage := make(map[string]domain.UserSessionData)
+	storage := make(map[string]auth.UserSessionData)
 	//storage := restoreFromDatabase()
 
 	mainSessionStorage := &MainSessionStorage{
@@ -21,7 +21,7 @@ func NewMainSessionStorage() *MainSessionStorage {
 	return mainSessionStorage
 }
 
-func (mss *MainSessionStorage) AddNewUser(data domain.UserSessionData) {
+func (mss *MainSessionStorage) AddNewUser(data auth.UserSessionData) {
 	data.ExpiryTime = time.Now().Add(time.Minute)
 	mss.storage[data.Token] = data
 	//log.Println(data)
@@ -48,7 +48,7 @@ func (mss *MainSessionStorage) GetTokenByUUID(uuid string) (token string, wasFou
 	return "", false
 }
 
-func restoreFromDatabase() map[string]domain.UserSessionData {
+func restoreFromDatabase() map[string]auth.UserSessionData {
 	panic("implement me")
 }
 

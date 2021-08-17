@@ -3,7 +3,7 @@ package dal
 import (
 	"backgammon/app"
 	"backgammon/config"
-	"backgammon/domain"
+	"backgammon/domain/auth"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" // shadow import
 	"github.com/jmoiron/sqlx"
@@ -46,7 +46,7 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 	}
 }
 
-func (d *DatabaseConnector) AddNewUser(data domain.UserAuthData) error {
+func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
 	userDTO := UserDataToUserDBDTO(data)
 
 	_, err := d.Database.NamedExec("insert into users (useruuid, userlogin, userpassword) values (:useruuid, :userlogin, :userpassword)",
@@ -73,27 +73,27 @@ func (d *DatabaseConnector) IsUserExist(login string) (bool, error) {
 	return false, nil
 }
 
-func (d *DatabaseConnector) GetUserByLogin(login string) (domain.UserAuthData, error) {
+func (d *DatabaseConnector) GetUserByLogin(login string) (auth.UserAuthData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select userlogin, userpassword, useruuid from users where userlogin = $1", login)
 	if err != nil {
 		log.Println("In dal.GetUserByLogin", err)
-		return domain.UserAuthData{}, err
+		return auth.UserAuthData{}, err
 	}
 	if users != nil && len(users) == 1 {
 		return UserDBDTOToUserData(users[0]), nil
 	}
 	if len(users) > 1 {
-		return domain.UserAuthData{}, MoreThanOneLoginRecordError
+		return auth.UserAuthData{}, MoreThanOneLoginRecordError
 	}
-	return domain.UserAuthData{}, app.ErrorInvalidLogin
+	return auth.UserAuthData{}, app.ErrorInvalidLogin
 }
 
-func (d *DatabaseConnector) UpdateUser(oldData domain.UserAuthData, newData domain.UserAuthData) error {
+func (d *DatabaseConnector) UpdateUser(oldData auth.UserAuthData, newData auth.UserAuthData) error {
 	panic("implement me")
 }
 
-func (d *DatabaseConnector) RemoveUser(data domain.UserAuthData) error {
+func (d *DatabaseConnector) RemoveUser(data auth.UserAuthData) error {
 	panic("implement me")
 }

@@ -1,10 +1,10 @@
 package dal
 
 import (
-	"backgammon/domain"
+	"backgammon/domain/auth"
 )
 
-func UserDataToUserDBDTO(user domain.UserAuthData) UserDBDTO {
+func UserDataToUserDBDTO(user auth.UserAuthData) UserDBDTO {
 	return UserDBDTO{
 		UUID:         user.UUID,
 		Login:        user.Login,
@@ -12,8 +12,8 @@ func UserDataToUserDBDTO(user domain.UserAuthData) UserDBDTO {
 	}
 }
 
-func UserDBDTOToUserData(user UserDBDTO) domain.UserAuthData {
-	return domain.UserAuthData{
+func UserDBDTOToUserData(user UserDBDTO) auth.UserAuthData {
+	return auth.UserAuthData{
 		UUID: user.UUID,
 		Login: user.Login,
 		Password: user.PasswordHash,

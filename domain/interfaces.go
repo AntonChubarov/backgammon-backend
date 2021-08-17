@@ -1,4 +1,4 @@
-package domain
+package auth
 
 type UserDataStorage interface {
 	AddNewUser(data UserAuthData) error
