@@ -7,11 +7,11 @@ import (
 )
 
 type MainSessionStorage struct {
-	storage map[string]auth.UserSessionData
+	storage map[string]*auth.UserSessionData
 }
 
 func NewMainSessionStorage() *MainSessionStorage {
-	storage := make(map[string]auth.UserSessionData)
+	storage := make(map[string]*auth.UserSessionData)
 	//storage := restoreFromDatabase()
 
 	mainSessionStorage := &MainSessionStorage{
@@ -21,10 +21,9 @@ func NewMainSessionStorage() *MainSessionStorage {
 	return mainSessionStorage
 }
 
-func (mss *MainSessionStorage) AddNewUser(data auth.UserSessionData) {
+func (mss *MainSessionStorage) AddNewUser(data *auth.UserSessionData) {
 	data.ExpiryTime = time.Now().Add(time.Minute)
 	mss.storage[data.Token] = data
-	//log.Println(data)
 }
 
 func (mss *MainSessionStorage) UpdateTokenExpiryTime(token string) {
@@ -48,7 +47,7 @@ func (mss *MainSessionStorage) GetTokenByUUID(uuid string) (token string, wasFou
 	return "", false
 }
 
-func restoreFromDatabase() map[string]auth.UserSessionData {
+func restoreFromDatabase() map[string]*auth.UserSessionData {
 	panic("implement me")
 }
 
