@@ -69,14 +69,14 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error 
 
 func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token string, err error) {
 	// Need to discuss
-	var isMatch bool
-
-	if isMatch, _ = uas.usernameRegexp.MatchString(data.Username); !isMatch {
-		return "", ErrorUserNotRegistered
-	}
-	if isMatch, _ = uas.passwordRegexp.MatchString(data.Password); !isMatch {
-		return "", ErrorInvalidPassword
-	}
+	//var isMatch bool
+	//
+	//if isMatch, _ = uas.usernameRegexp.MatchString(data.Username); !isMatch {
+	//	return "", ErrorUserNotRegistered
+	//}
+	//if isMatch, _ = uas.passwordRegexp.MatchString(data.Password); !isMatch {
+	//	return "", ErrorInvalidPassword
+	//}
 
 	token = ""
 	var user domainAuth.UserAuthData
