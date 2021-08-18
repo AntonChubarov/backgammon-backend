@@ -1,7 +1,7 @@
 package auth
 
 type SessionStorage interface {
-	AddNewUser(data UserSessionData)
+	AddNewUser(data *UserSessionData)
 	UpdateTokenExpiryTime(token string)
 	DeleteUserByToken(token string)
 	GetTokenByUUID(uuid string) (token string, wasFound bool)

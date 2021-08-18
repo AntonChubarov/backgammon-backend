@@ -56,7 +56,7 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var token string
 	token, err = uah.service.AuthorizeUser(user)
 
-	if err == auth.ErrorInvalidLogin || err == auth.ErrorInvalidPassword {
+	if err == auth.ErrorUserNotRegistered || err == auth.ErrorInvalidPassword {
 		errStr := err.Error()
 		return c.JSON(http.StatusUnauthorized, UserAuthorizationResponseDTO{Message: errStr})
 	}

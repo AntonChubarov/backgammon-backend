@@ -6,7 +6,6 @@ import (
 )
 
 func Test_RollOneDice(t *testing.T) {
-
 	var count [6]int
 	n := 100000
 
@@ -40,9 +39,7 @@ func Test_RollOneDice(t *testing.T) {
 	}
 }
 
-
 func Test_RollDice(t *testing.T) {
-
 	n := 100000
 	var count [21]int
 	diceCases := [21] DiceState{
@@ -72,8 +69,6 @@ func Test_RollDice(t *testing.T) {
 	for i := 0; i < n; i++ {
 		d := RollDice()
 
-
-
 		assert.True(t, isDiceCaseValid(d))
 
 		for j := range diceCases {
@@ -87,8 +82,6 @@ func Test_RollDice(t *testing.T) {
 		assert.Greater(t, count[k], 0)
 	}
 }
-
-
 
 func isDiceCaseValid(d *DiceState) bool {
 	if d.Dice1<1 || d.Dice1>6 || d.Dice2<1 || d.Dice2>6 { return false}
