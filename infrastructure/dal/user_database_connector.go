@@ -90,7 +90,7 @@ func (d *DatabaseConnector) GetUserByUsername(username string) (auth.UserAuthDat
 	if len(users) > 1 {
 		return auth.UserAuthData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return auth.UserAuthData{}, auth2.ErrorInvalidUsername
+	return auth.UserAuthData{}, auth2.ErrorUserNotRegistered
 }
 
 func (d *DatabaseConnector) UpdateUser(oldData, newData auth.UserAuthData) error {

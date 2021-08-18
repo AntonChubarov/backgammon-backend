@@ -3,6 +3,7 @@ module backgammon
 go 1.16
 
 require (
+	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/gorilla/websocket v1.4.2
