@@ -9,7 +9,6 @@ import (
 type TokenGeneratorFlex struct {
 	TokenLength int
 	AllowedSymbols string
-	allowedSymbolsNumber int
 }
 
 func NewTokenGeneratorFlex(c *config.ServerConfig ) TokenGenerator {

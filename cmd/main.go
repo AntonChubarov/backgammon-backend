@@ -26,10 +26,11 @@ func main() {
 		serverConfig.Database.Port,
 		serverConfig.Database.Name), s)
 
-	storage := dal.NewDatabaseConnector(serverConfig)
+	userStorage := dal.NewDatabaseConnector(serverConfig)
 	mainSessionStorage := dal.NewMainSessionStorage()
+	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
-	userAuthService := auth.NewUserAuthService(storage, mainSessionStorage, serverConfig)
+	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 
 	webSocket := handlers.NewWebSocketHandler()
@@ -38,7 +39,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {return nil})
 	e.GET("/ws", webSocket.Handle)
 	e.POST("/register", userAuthHandler.Register)
-	e.POST("/login", userAuthHandler.Authorize)
+	e.POST("/authorize", userAuthHandler.Authorize)
 
 	e.Logger.Fatal(e.Start(serverConfig.Host.ServerStartPort))
 }

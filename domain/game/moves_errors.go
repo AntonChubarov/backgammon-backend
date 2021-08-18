@@ -24,16 +24,16 @@ import "fmt"
 // 3. Номер хода не соответствует ожидаемому
 
 var ErrorOutOfTurn = fmt.Errorf("attempt to make move out of turn")
-var ErrorUotOfGame = fmt.Errorf("attemt to make move out of game")
+var ErrorUotOfGame = fmt.Errorf("attempt to make move out of game")
 
 var ErrorOpponentsStickMoveAttempt = fmt.Errorf("attempt to make move by opponent's stick")
-var ErrorIncorrectMoveDirection = fmt.Errorf("attemt to make move in wrong direction")
+var ErrorIncorrectMoveDirection = fmt.Errorf("attempt to make move in wrong direction")
 var ErrorIncorrectNumberOfSteps = fmt.Errorf("attempt to make move on wrong number of steps")
 var ErrorMoveToOccupiedHole = fmt.Errorf("attempt to make move in a hole, ocupied by opponent")
 var ErrorMoveFromHeadLimit1 = fmt.Errorf("attempt to use more than 1 stick from head due turn")
 var ErrorMoveFromEmptyHole = fmt.Errorf("attempt to make move from empty hole")
 
-var ErrorImpossibleMoveKind = fmt.Errorf("attempt to make move, which type is disallowed in curent game type")
+var ErrorImpossibleMoveKind = fmt.Errorf("attempt to make move, which type is disallowed in current game type")
 
 var ErrorImpossibleMoveKindInGamePhase = fmt.Errorf("attempt to make move, which type is disallowed in current game phase")
 

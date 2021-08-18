@@ -6,8 +6,8 @@ import (
 
 func ConvertUserRegDataToUser(user UserAuthRequestDTO) auth.UserAuthData {
 	return auth.UserAuthData{
-		Login: user.Login,
+		Username: user.Username,
 		Password: user.Password,
-		Token: "",
+		Token:    "",
 	}
 }

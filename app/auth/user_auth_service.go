@@ -19,7 +19,6 @@ func NewUserAuthService(storage domainAuth.UserDataStorage,
 	mainSessionStorage SessionStorage,
 	config *config.ServerConfig,
 	tokenGenerator TokenGenerator) *UserAuthService {
-
 	return &UserAuthService{storage: storage,
 		mainSessionStorage: mainSessionStorage,
 		config:             config,
@@ -28,9 +27,12 @@ func NewUserAuthService(storage domainAuth.UserDataStorage,
 }
 
 func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error {
-	userExist, err := uas.storage.IsUserExist(data.Login)
+	userExist, err := uas.storage.IsUserExist(data.Username)
 	if userExist {
 		return ErrorUserExists
+	}
+	if err != nil {
+		return err
 	}
 
 	data.UUID = utils.GenerateUUID()
@@ -54,7 +56,7 @@ func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token s
 	token = ""
 	var user domainAuth.UserAuthData
 
-	user, err = uas.storage.GetUserByLogin(data.Login)
+	user, err = uas.storage.GetUserByUsername(data.Username)
 	if err != nil {
 		return
 	}
@@ -76,6 +78,6 @@ func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token s
 		return
 	}
 	token = uas.tokenGenerator.GenerateToken()
-	uas.mainSessionStorage.AddNewUser(UserSessionData{Token: token, UserUUID: user.UUID})
+	uas.mainSessionStorage.AddNewUser(&UserSessionData{Token: token, UserUUID: user.UUID})
 	return
 }
