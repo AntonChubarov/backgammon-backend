@@ -3,18 +3,17 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/tkanos/gonfig"
-	"log"
 )
 
 type ServerConfig struct {
-	Host HostConfig
+	Server   Server
 	Database DBConfig
 	Token TokenConfig
 }
 
-type HostConfig struct {
-	ServerHost string `env:"SERVER_HOST"`
-	ServerStartPort string `env:"SERVER_START_PORT"`
+type Server struct {
+	Host string `env:"SERVER_HOST"`
+	Port string `env:"SERVER_START_PORT"`
 }
 
 type DBConfig struct {
@@ -33,35 +32,35 @@ type TokenConfig struct {
 func NewServerConfig() *ServerConfig {
 	var err error
 
-	var hostConfig HostConfig
+	var hostConfig Server
 	err = getConfig(&hostConfig)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 
 	var dbConfig DBConfig
 	err = getConfig(&dbConfig)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 
 	var tokenConfig TokenConfig
 	err = getConfig(&tokenConfig)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 
 	return &ServerConfig{
-		Host: hostConfig,
-		Database: dbConfig,
-		Token: tokenConfig,
+		Server: hostConfig,
+		Database:   dbConfig,
+		Token:      tokenConfig,
 	}
 }
 
 func getConfig(configType interface{}) (err error) {
 	err = godotenv.Load(".env")
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 	return gonfig.GetConf("", configType)
 }
