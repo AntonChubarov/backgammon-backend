@@ -38,13 +38,26 @@ func (r *RuleMoveDirection) ValidateRule(g *Game, c board.StickColor, m *board.M
 
 //Rule005
 func (r *RuleMoveImpossibleAmountSteps) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
+	//TODO THis is draft function! It ignores consumedDice
+	if consumedDice!=nil {
+		if len(consumedDice)>0 {panic("consumed Dice are not supported yet")}
+	}
 
-	//TODO - implement method!
+	distance:=MoveDistance(c, m.From, m.To)
+	if g.DiceState.Dice1 == g.DiceState.Dice2 {
+		if distance==g.DiceState.Dice1 {return nil}
+		if distance==g.DiceState.Dice1*2 {return nil}
+		if distance==g.DiceState.Dice1*3 {return nil}
+		if distance==g.DiceState.Dice1*4 {return nil}
+	}
+	if distance==g.DiceState.Dice1 {return nil}
+	if distance==g.DiceState.Dice2 {return nil}
+	if distance==g.DiceState.Dice1+g.DiceState.Dice2 {return nil}
 
-	if r.nextRule!=nil {return r.nextRule.ValidateRule(g, c, m, consumedDice)}
-	return nil
+	if r.nextRule==nil {return ErrorIncorrectNumberOfStepsInMove}
+	return r.nextRule.ValidateRule(g, c, m, consumedDice)
+
 }
-
 
 //Rule006
 func (r *RuleMoveToOccupiedHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
@@ -59,5 +72,15 @@ func (r *RuleMoveFromEmptyHole) ValidateRule(g *Game, c board.StickColor, m *boa
 
 	if r.nextRule!=nil {return r.nextRule.ValidateRule(g, c, m, consumedDice)}
 	return nil
+}
+
+func (r *RuleForbiddenMoveKindLongBackgammon) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
+	if m.MoveKind==board.Movement {return nil}
+	if m.MoveKind==board.Removing {return nil}
+	if m.MoveKind==board.Surrender {return nil}
+
+	if r.nextRule==nil {return ErrorImpossibleMoveKind}
+	return r.nextRule.ValidateRule(g, c, m, consumedDice)
+
 }
 

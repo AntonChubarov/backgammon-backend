@@ -20,6 +20,6 @@ type RuleMoveFromEmptyHole struct {
 	nextRule MovingRule
 }
 
-type RulePossibleSteps struct {
-
+type RuleForbiddenMoveKindLongBackgammon struct {
+	nextRule MovingRule
 }

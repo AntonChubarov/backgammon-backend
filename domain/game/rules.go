@@ -7,10 +7,7 @@ type MovingRule interface {
 	SetNextRule(mr MovingRule)
 }
 
-
-
-
-
-
-
-
+type TurnRule interface {
+	ValidateRule(g *Game, c board.StickColor, t *board.Turn) error
+	SetNextRule(tr TurnRule)
+}

@@ -24,3 +24,20 @@ func DiceInterpretationLongBackgammon(d *board.DiceState) []int {
 	steps[1] = d.Dice2
 	return steps
 }
+
+func IsStartOfFence(b board.Board, c board.StickColor, startHole int) bool {
+	if c==board.Black{
+		for j:=startHole; j<=startHole+5 && j<=24; j++{
+			if b.Holes[j].StickColor!=c { return false}
+		}
+		return true
+	} else {
+		startHole=board.InvertNumeration(startHole)
+		for j:=startHole; j<=startHole+5 && j<=24; j++{
+			if b.Holes[j].StickColor!=c { return false}
+		}
+		return true
+	}
+}
+
+func IsFenceBlocking(b board.Board, fenceStartHole int)

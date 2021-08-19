@@ -18,5 +18,9 @@ func (r *RuleMoveFromEmptyHole) SetNextRule(mr MovingRule) {
 	r.nextRule=mr
 }
 
+func (r *RuleForbiddenMoveKindInGameType) SetNextRule(mr MovingRule) {
+	r.nextRule=mr
+}
+
 
 
