@@ -17,10 +17,10 @@ func (r *RuleMoveToOccupiedHole) SetNextRule(mr MovingRule) {
 func (r *RuleMoveFromEmptyHole) SetNextRule(mr MovingRule) {
 	r.nextRule=mr
 }
-
-func (r *RuleForbiddenMoveKindInGameType) SetNextRule(mr MovingRule) {
-	r.nextRule=mr
-}
+// Need to check this type
+//func (r *RuleForbiddenMoveKindInGameType) SetNextRule(mr MovingRule) {
+//	r.nextRule=mr
+//}
 
 
 

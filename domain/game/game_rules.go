@@ -40,4 +40,4 @@ func IsStartOfFence(b board.Board, c board.StickColor, startHole int) bool {
 	}
 }
 
-func IsFenceBlocking(b board.Board, fenceStartHole int)
+//func IsFenceBlocking(b board.Board, fenceStartHole int)
