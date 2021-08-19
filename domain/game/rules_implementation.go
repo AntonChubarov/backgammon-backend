@@ -53,4 +53,11 @@ func (r *RuleMoveToOccupiedHole) ValidateRule(g *Game, c board.StickColor, m *bo
 	if r.nextRule!=nil {return r.nextRule.ValidateRule(g, c, m, consumedDice)}
 	return nil
 }
+//Rule008
+func (r *RuleMoveFromEmptyHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
+	if g.Board.Holes[m.From].StickCount==0 { return ErrorMoveFromEmptyHole}
+
+	if r.nextRule!=nil {return r.nextRule.ValidateRule(g, c, m, consumedDice)}
+	return nil
+}
 

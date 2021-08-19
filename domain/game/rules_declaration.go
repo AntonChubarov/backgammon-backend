@@ -15,3 +15,11 @@ type RuleMoveImpossibleAmountSteps struct {
 type RuleMoveToOccupiedHole struct {
 	nextRule MovingRule
 }
+
+type RuleMoveFromEmptyHole struct {
+	nextRule MovingRule
+}
+
+type RulePossibleSteps struct {
+
+}

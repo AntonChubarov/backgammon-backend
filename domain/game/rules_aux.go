@@ -14,6 +14,9 @@ func (r *RuleMoveImpossibleAmountSteps) SetNextRule(mr MovingRule) {
 func (r *RuleMoveToOccupiedHole) SetNextRule(mr MovingRule) {
 	r.nextRule=mr
 }
+func (r *RuleMoveFromEmptyHole) SetNextRule(mr MovingRule) {
+	r.nextRule=mr
+}
 
 
 
