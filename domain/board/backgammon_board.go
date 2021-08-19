@@ -36,7 +36,7 @@ type Move struct {
 }
 
 type Board struct {
-	Holes [24]Hole
+	Holes [25]Hole //Hole[0] - empty placeholder
 }
 
 func (b *Board) Clear() {

@@ -8,7 +8,7 @@ import (
 
 //Rule003
 func (r *RuleMoveMatchStickColor) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
-	if g.Board.Holes[m.From-1].StickColor != c && g.Board.Holes[m.From-1].StickCount != 0 {
+	if g.Board.Holes[m.From].StickColor != c && g.Board.Holes[m.From].StickCount != 0 {
 		return ErrorOpponentsStickMoveAttempt
 	}
 
