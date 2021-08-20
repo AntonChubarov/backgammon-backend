@@ -28,19 +28,22 @@ func main() {
 
 	userStorage := dal.NewDatabaseConnector(serverConfig)
 	mainSessionStorage := dal.NewMainSessionStorage()
+
 	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
 	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
-	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
 
-	webSocket := handlers.NewWebSocketHandler(userWebSocketManageService)
+	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
+	lobbyHandler := handlers.NewLobbyHandler(userAuthService)
+	webSocketHandler := handlers.NewWebSocketHandler(userAuthService, userWebSocketManageService)
 
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {return nil})
-	e.GET("/ws", webSocket.Handle)
+
 	e.POST("/register", userAuthHandler.Register)
 	e.POST("/authorize", userAuthHandler.Authorize)
+	e.GET("/rooms", lobbyHandler.GetRoomsInfo)
+	e.GET("/ws", webSocketHandler.Handle)
 
 	e.Logger.Fatal(e.Start(serverConfig.Server.Port))
 }

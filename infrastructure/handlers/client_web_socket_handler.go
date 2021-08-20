@@ -7,17 +7,18 @@ import (
 )
 
 type WebSocketHandler struct {
+	userAuthService *auth.UserAuthService
 	webSocketManageService *auth.WebSocketManageService
 }
 
-func NewWebSocketHandler(webSocketManageService *auth.WebSocketManageService) *WebSocketHandler {
-	return &WebSocketHandler{webSocketManageService: webSocketManageService}
+func NewWebSocketHandler(userAuthService *auth.UserAuthService, webSocketManageService *auth.WebSocketManageService) *WebSocketHandler {
+	return &WebSocketHandler{userAuthService: userAuthService, webSocketManageService: webSocketManageService}
 }
 
 func (wsh *WebSocketHandler) Handle(c echo.Context) (err error) {
 	token := c.QueryParam("token")
 
-	err = wsh.webSocketManageService.CheckToken(token)
+	err = wsh.userAuthService.CheckToken(token)
 	if err != nil {
 		return err
 	}
