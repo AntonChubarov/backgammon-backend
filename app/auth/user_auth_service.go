@@ -68,16 +68,6 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error 
 }
 
 func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token string, err error) {
-	// Need to discuss
-	//var isMatch bool
-	//
-	//if isMatch, _ = uas.usernameRegexp.MatchString(data.Username); !isMatch {
-	//	return "", ErrorUserNotRegistered
-	//}
-	//if isMatch, _ = uas.passwordRegexp.MatchString(data.Password); !isMatch {
-	//	return "", ErrorInvalidPassword
-	//}
-
 	token = ""
 	var user domainAuth.UserAuthData
 
@@ -105,4 +95,11 @@ func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token s
 	token = uas.tokenGenerator.GenerateToken()
 	uas.mainSessionStorage.AddNewUser(&UserSessionData{Token: token, UserUUID: user.UUID})
 	return
+}
+
+func (uas *UserAuthService) CheckToken(token string) error {
+	if !uas.mainSessionStorage.IsTokenValid(token) {
+		return ErrorInvalidToken
+	}
+	return nil
 }
