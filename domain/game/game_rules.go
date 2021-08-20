@@ -6,6 +6,7 @@ type RulesKeeper interface {
 	InitGame(game *Game)
 	PerformTurn(game *Game, stickColor *board.StickColor, turn *board.Turn) error
 	GetDiceInterpretation() func(d *board.DiceState) []int
+	ElectFirstMove() board.StickColor
 }
 
 func DiceInterpretationLongBackgammon(d *board.DiceState) []int {
