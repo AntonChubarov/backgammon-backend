@@ -31,21 +31,23 @@ type Turn struct {
 
 type Move struct {
 	MoveKind
-	From int // should be an integer between 1 and 24
-	Steps int // which way we should determine stick remove?
+	From int
+	To int
 }
 
 type Board struct {
-	CurrentDiceState DiceState
-	CurrentTurnColor StickColor
-	Holes [24]Hole
+	Holes [25]Hole //Hole[0] - empty placeholder
 }
 
 func (b *Board) Clear() {
-	b.CurrentTurnColor=White
-	b.CurrentDiceState=DiceState{Dice1: 0, Dice2: 0}
 	for i:= range b.Holes {
 		b.Holes[i].StickCount =0
 	}
 }
+
+func InvertNumeration(n int) int {
+	if n<=12 {return n +12}
+	return n-12
+}
+
 
