@@ -8,11 +8,11 @@ import (
 )
 
 type UserAuthHandler struct {
-	service *auth.UserAuthService
+	userAuthService *auth.UserAuthService
 }
 
 func NewUserAuthHandler(service *auth.UserAuthService) *UserAuthHandler {
-	return &UserAuthHandler{service: service}
+	return &UserAuthHandler{userAuthService: service}
 }
 
 func (uah *UserAuthHandler) Register(c echo.Context) error {
@@ -26,7 +26,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	}
 
 	user := ConvertUserRegDataToUser(request)
-	err = uah.service.RegisterNewUser(user)
+	err = uah.userAuthService.RegisterNewUser(user)
 
 	if err == auth.ErrorUserExists {
 		errStr := err.Error()
@@ -52,11 +52,11 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	}
 
 	user := ConvertUserRegDataToUser(request)
-	// Authorize User
-	var token string
-	token, err = uah.service.AuthorizeUser(user)
 
-	if err == auth.ErrorInvalidLogin || err == auth.ErrorInvalidPassword {
+	var token string
+	token, err = uah.userAuthService.AuthorizeUser(user)
+
+	if err == auth.ErrorUserNotRegistered || err == auth.ErrorInvalidPassword {
 		errStr := err.Error()
 		return c.JSON(http.StatusUnauthorized, UserAuthorizationResponseDTO{Message: errStr})
 	}
@@ -67,4 +67,14 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, UserAuthorizationResponseDTO{Message: "Authorized", Token: token})
+}
+
+func (uah *UserAuthHandler) ProlongToken(c echo.Context) error {
+
+	panic("Implement me")
+}
+
+func (uah *UserAuthHandler) Logout(c echo.Context) error {
+
+	panic("Implement me")
 }

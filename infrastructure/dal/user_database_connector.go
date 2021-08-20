@@ -49,7 +49,7 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
 	userDTO := UserDataToUserDBDTO(data)
 
-	_, err := d.Database.NamedExec("insert into users (useruuid, userlogin, userpassword) values (:useruuid, :userlogin, :userpassword)",
+	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
 		userDTO)
 	if err != nil {
 		log.Println("In dal.AddNewUser", err)
@@ -59,10 +59,10 @@ func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
 	return nil
 }
 
-func (d *DatabaseConnector) IsUserExist(login string) (bool, error) {
+func (d *DatabaseConnector) IsUserExist(username string) (bool, error) {
 	var users []UserDBDTO
 
-	err := d.Database.Select(&users, "select userlogin, userpassword from users where userlogin = $1", login)
+	err := d.Database.Select(&users, "select username, userpassword from users where username = $1", username)
 	if err != nil {
 		log.Println("In dal.IsUserExist", err)
 		return false, err
@@ -73,24 +73,27 @@ func (d *DatabaseConnector) IsUserExist(login string) (bool, error) {
 	return false, nil
 }
 
-func (d *DatabaseConnector) GetUserByLogin(login string) (auth.UserAuthData, error) {
+func (d *DatabaseConnector) GetUserByUsername(username string) (auth.UserAuthData, error) {
 	var users []UserDBDTO
 
-	err := d.Database.Select(&users, "select userlogin, userpassword, useruuid from users where userlogin = $1", login)
+	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
 	if err != nil {
-		log.Println("In dal.GetUserByLogin", err)
+		log.Println("In dal.GetUserByUsername", err)
 		return auth.UserAuthData{}, err
 	}
-	if users != nil && len(users) == 1 {
+	if users == nil {
+		return auth.UserAuthData{}, ErrorNoUserInDatabase
+	}
+	if len(users) == 1 {
 		return UserDBDTOToUserData(users[0]), nil
 	}
 	if len(users) > 1 {
-		return auth.UserAuthData{}, MoreThanOneLoginRecordError
+		return auth.UserAuthData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return auth.UserAuthData{}, auth2.ErrorInvalidLogin
+	return auth.UserAuthData{}, auth2.ErrorUserNotRegistered
 }
 
-func (d *DatabaseConnector) UpdateUser(oldData auth.UserAuthData, newData auth.UserAuthData) error {
+func (d *DatabaseConnector) UpdateUser(oldData, newData auth.UserAuthData) error {
 	panic("implement me")
 }
 

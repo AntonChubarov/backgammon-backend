@@ -26,21 +26,26 @@ func main() {
 		serverConfig.Database.Port,
 		serverConfig.Database.Name), s)
 
-	storage := dal.NewDatabaseConnector(serverConfig)
+	userStorage := dal.NewDatabaseConnector(serverConfig)
 	mainSessionStorage := dal.NewMainSessionStorage()
 
-	userAuthService := auth.NewUserAuthService(storage, mainSessionStorage, serverConfig)
-	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
+	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
-	webSocket := handlers.NewWebSocketHandler()
+	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
+	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
+
+	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
+	lobbyHandler := handlers.NewLobbyHandler(userAuthService)
+	webSocketHandler := handlers.NewWebSocketHandler(userAuthService, userWebSocketManageService)
 
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {return nil})
-	e.GET("/ws", webSocket.Handle)
-	e.POST("/register", userAuthHandler.Register)
-	e.POST("/login", userAuthHandler.Authorize)
 
-	e.Logger.Fatal(e.Start(serverConfig.Host.ServerStartPort))
+	e.POST("/register", userAuthHandler.Register)
+	e.POST("/authorize", userAuthHandler.Authorize)
+	e.GET("/rooms", lobbyHandler.GetRoomsInfo)
+	e.GET("/ws", webSocketHandler.Handle)
+
+	e.Logger.Fatal(e.Start(serverConfig.Server.Port))
 }
 
 func runDBMigrate(dsn string, source *bindata.AssetSource)  {

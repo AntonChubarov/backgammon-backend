@@ -1,8 +1,8 @@
 package auth
 
 type UserAuthData struct {
-	UUID string
-	Login string
+	UUID     string
+	Username string
 	Password string
 	Token string
 }

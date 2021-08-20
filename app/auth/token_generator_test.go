@@ -15,10 +15,10 @@ var conf = config.ServerConfig{
 			TokenLength: 16,
 			TokenSymbols: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"},
 			}
+
 var generator = NewTokenGeneratorFlex(&conf)
 
 func TestGenerateToken(t *testing.T) {
-
 	n := 10000
 	var token string
 	tokenRegex := fmt.Sprintf("^[a-zA-Z0-9]{%d}$", conf.Token.TokenLength)
@@ -34,7 +34,6 @@ func TestGenerateToken(t *testing.T) {
 }
 
 func TestTokenGenerationUniqueness(t *testing.T) {
-
 	n := 10000
 	var token string
 	var isUnique bool
@@ -49,12 +48,3 @@ func TestTokenGenerationUniqueness(t *testing.T) {
 		tokens = append(tokens, token)
 	}
 }
-
-//func contains(s *[]string, e string) bool {
-//	for i := range *s {
-//		if (*s)[i] == e {
-//			return true
-//		}
-//	}
-//	return false
-//}
