@@ -49,7 +49,7 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
 	userDTO := UserDataToUserDBDTO(data)
 
-	_, err := d.Database.NamedExec("insert into users (useruuid, userlogin, userpassword) values (:useruuid, :userlogin, :userpassword)",
+	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
 		userDTO)
 	if err != nil {
 		log.Println("In dal.AddNewUser", err)
@@ -62,7 +62,7 @@ func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
 func (d *DatabaseConnector) IsUserExist(username string) (bool, error) {
 	var users []UserDBDTO
 
-	err := d.Database.Select(&users, "select userlogin, userpassword from users where userlogin = $1", username)
+	err := d.Database.Select(&users, "select username, userpassword from users where username = $1", username)
 	if err != nil {
 		log.Println("In dal.IsUserExist", err)
 		return false, err
@@ -76,7 +76,7 @@ func (d *DatabaseConnector) IsUserExist(username string) (bool, error) {
 func (d *DatabaseConnector) GetUserByUsername(username string) (auth.UserAuthData, error) {
 	var users []UserDBDTO
 
-	err := d.Database.Select(&users, "select userlogin, userpassword, useruuid from users where userlogin = $1", username)
+	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
 	if err != nil {
 		log.Println("In dal.GetUserByUsername", err)
 		return auth.UserAuthData{}, err

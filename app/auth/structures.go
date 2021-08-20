@@ -9,7 +9,7 @@ type UserSessionData struct {
 	Token string
 	ExpiryTime time.Time
 	UserUUID string
-	WebSocket websocket.Conn
+	WebSocket *websocket.Conn
 }
 
 

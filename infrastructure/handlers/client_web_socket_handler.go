@@ -1,42 +1,35 @@
 package handlers
 
 import (
-	"fmt"
+	"backgammon/app/auth"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
 
 type WebSocketHandler struct {
-	
+	webSocketManageService *auth.WebSocketManageService
 }
 
-func NewWebSocketHandler() *WebSocketHandler {
-	return &WebSocketHandler{}
+func NewWebSocketHandler(webSocketManageService *auth.WebSocketManageService) *WebSocketHandler {
+	return &WebSocketHandler{webSocketManageService: webSocketManageService}
 }
 
-func (wsh *WebSocketHandler) Handle(c echo.Context) error {
+func (wsh *WebSocketHandler) Handle(c echo.Context) (err error) {
+	token := c.QueryParam("token")
+
+	err = wsh.webSocketManageService.CheckToken(token)
+	if err != nil {
+		return err
+	}
+
 	upgrader := websocket.Upgrader{}
-
-	var err error
 	var ws *websocket.Conn
-
 	ws, err = upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
 
-	for {
-		err = ws.WriteJSON("message")
-		if err != nil {
-			c.Logger().Error(err)
-		}
+	wsh.webSocketManageService.SetWebSocketByToken(token, ws)
 
-		var msg string
-		err = ws.ReadJSON(&msg)
-		if err != nil {
-			c.Logger().Error(err)
-		}
-		fmt.Printf("%s\n", msg)
-	}
+	return
 }

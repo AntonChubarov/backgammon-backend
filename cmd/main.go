@@ -32,8 +32,9 @@ func main() {
 
 	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
+	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
 
-	webSocket := handlers.NewWebSocketHandler()
+	webSocket := handlers.NewWebSocketHandler(userWebSocketManageService)
 
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {return nil})
@@ -41,7 +42,7 @@ func main() {
 	e.POST("/register", userAuthHandler.Register)
 	e.POST("/authorize", userAuthHandler.Authorize)
 
-	e.Logger.Fatal(e.Start(serverConfig.Host.ServerStartPort))
+	e.Logger.Fatal(e.Start(serverConfig.Server.Port))
 }
 
 func runDBMigrate(dsn string, source *bindata.AssetSource)  {
