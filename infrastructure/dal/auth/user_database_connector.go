@@ -46,8 +46,8 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 	}
 }
 
-func (d *DatabaseConnector) AddNewUser(data authdomain.UserAuthData) error {
-	userDTO := UserDataToUserDBDTO(data)
+func (d *DatabaseConnector) AddNewUser(data *authdomain.UserData) error {
+	userDTO := UserDataToUserDBDTO(*data)
 
 	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
 		userDTO)
@@ -59,44 +59,52 @@ func (d *DatabaseConnector) AddNewUser(data authdomain.UserAuthData) error {
 	return nil
 }
 
-func (d *DatabaseConnector) IsUserExist(username string) (bool, error) {
-	var users []UserDBDTO
-
-	err := d.Database.Select(&users, "select username, userpassword from users where username = $1", username)
-	if err != nil {
-		//log.Println("In dal.IsUserExist", err)
-		return false, err
-	}
-	if users != nil {
-		return true, nil
-	}
-	return false, nil
-}
-
-func (d *DatabaseConnector) GetUserByUsername(username string) (authdomain.UserAuthData, error) {
+func (d *DatabaseConnector) GetUserByUsername(username authdomain.UserName) (*authdomain.UserData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
 	if err != nil {
 		//log.Println("In dal.GetUserByUsername", err)
-		return authdomain.UserAuthData{}, err
+		return &authdomain.UserData{}, err
 	}
 	if users == nil {
-		return authdomain.UserAuthData{}, ErrorNoUserInDatabase
+		return &authdomain.UserData{}, ErrorNoUserInDatabase
 	}
 	if len(users) == 1 {
-		return UserDBDTOToUserData(users[0]), nil
+		user := UserDBDTOToUserData(users[0])
+		return &user, nil
 	}
 	if len(users) > 1 {
-		return authdomain.UserAuthData{}, ErrorMoreThanOneUsernameRecord
+		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return authdomain.UserAuthData{}, auth2.ErrorUserNotRegistered
+	return &authdomain.UserData{}, auth2.ErrorUserNotRegistered
 }
 
-func (d *DatabaseConnector) UpdateUser(oldData, newData authdomain.UserAuthData) error {
+func (d *DatabaseConnector) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
+	var users []UserDBDTO
+
+	err := d.Database.Select(&users, "select username, userpassword from users where useruuid = $1", string(uuid))
+	if err != nil {
+		//log.Println("In dal.GetUserByUsername", err)
+		return &authdomain.UserData{}, err
+	}
+	if users == nil {
+		return &authdomain.UserData{}, ErrorNoUserInDatabase
+	}
+	if len(users) == 1 {
+		user := UserDBDTOToUserData(users[0])
+		return &user, nil
+	}
+	if len(users) > 1 {
+		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
+	}
+	return &authdomain.UserData{}, auth2.ErrorUserNotRegistered
+}
+
+func (d *DatabaseConnector) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
 	panic("implement me")
 }
 
-func (d *DatabaseConnector) RemoveUser(data authdomain.UserAuthData) error {
+func (d *DatabaseConnector) RemoveUser(uuid authdomain.UUID) error {
 	panic("implement me")
 }
