@@ -3,7 +3,6 @@ package handlers
 import (
 	"backgammon/app/auth"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -23,7 +22,7 @@ func (lh *LobbyHandler) GetRoomsInfo(c echo.Context) error {
 	err = lh.userAuthService.CheckToken(token)
 
 	if err != nil {
-		log.Println("In handlers.LobbyHandler.GetRoomsInfo", err)
+		//log.Println("In handlers.LobbyHandler.GetRoomsInfo", err)
 		return echo.ErrUnauthorized
 	}
 
@@ -39,7 +38,7 @@ func (lh *LobbyHandler) CreateRoom(c echo.Context) error {
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.LobbyHandler.CreateRoom", err)
+		//log.Println("In handlers.LobbyHandler.CreateRoom", err)
 		return echo.ErrBadRequest
 	}
 
@@ -53,7 +52,7 @@ func (lh *LobbyHandler) ConnectToRoom(c echo.Context) error {
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.LobbyHandler.ConnectToRoom", err)
+		//log.Println("In handlers.LobbyHandler.ConnectToRoom", err)
 		return echo.ErrBadRequest
 	}
 
@@ -67,7 +66,7 @@ func (lh *LobbyHandler) Disconnect(c echo.Context) error {
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.LobbyHandler.Disconnect", err)
+		//log.Println("In handlers.LobbyHandler.Disconnect", err)
 		return echo.ErrBadRequest
 	}
 
