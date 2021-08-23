@@ -1,9 +1,9 @@
-package dal
+package auth
 
 import (
 	auth2 "backgammon/app/auth"
 	"backgammon/config"
-	"backgammon/domain/auth"
+	"backgammon/domain/authdomain"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" // shadow import
 	"github.com/jmoiron/sqlx"
@@ -46,7 +46,7 @@ func (d *DatabaseConnector) CloseDatabaseConnection() {
 	}
 }
 
-func (d *DatabaseConnector) AddNewUser(data auth.UserAuthData) error {
+func (d *DatabaseConnector) AddNewUser(data authdomain.UserAuthData) error {
 	userDTO := UserDataToUserDBDTO(data)
 
 	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
@@ -73,30 +73,30 @@ func (d *DatabaseConnector) IsUserExist(username string) (bool, error) {
 	return false, nil
 }
 
-func (d *DatabaseConnector) GetUserByUsername(username string) (auth.UserAuthData, error) {
+func (d *DatabaseConnector) GetUserByUsername(username string) (authdomain.UserAuthData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
 	if err != nil {
 		//log.Println("In dal.GetUserByUsername", err)
-		return auth.UserAuthData{}, err
+		return authdomain.UserAuthData{}, err
 	}
 	if users == nil {
-		return auth.UserAuthData{}, ErrorNoUserInDatabase
+		return authdomain.UserAuthData{}, ErrorNoUserInDatabase
 	}
 	if len(users) == 1 {
 		return UserDBDTOToUserData(users[0]), nil
 	}
 	if len(users) > 1 {
-		return auth.UserAuthData{}, ErrorMoreThanOneUsernameRecord
+		return authdomain.UserAuthData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return auth.UserAuthData{}, auth2.ErrorUserNotRegistered
+	return authdomain.UserAuthData{}, auth2.ErrorUserNotRegistered
 }
 
-func (d *DatabaseConnector) UpdateUser(oldData, newData auth.UserAuthData) error {
+func (d *DatabaseConnector) UpdateUser(oldData, newData authdomain.UserAuthData) error {
 	panic("implement me")
 }
 
-func (d *DatabaseConnector) RemoveUser(data auth.UserAuthData) error {
+func (d *DatabaseConnector) RemoveUser(data authdomain.UserAuthData) error {
 	panic("implement me")
 }

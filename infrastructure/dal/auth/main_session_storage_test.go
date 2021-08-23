@@ -1,4 +1,4 @@
-package dal
+package auth
 
 import (
 	"backgammon/app/auth"
@@ -29,10 +29,10 @@ func TestAddNewUser(t *testing.T) {
 		//go func() {
 			for i := 0; i < 10; i++ {
 				data = auth.UserSessionData{
-					Token: tokenGenerator.GenerateToken(),
+					Token:      tokenGenerator.GenerateToken(),
 					ExpiryTime: time.Now().UTC().Add(30 * time.Second),
-					UserUUID: utils.GenerateUUID(),
-					WebSocket: &websocket.Conn{},
+					UserUUID:   utils.GenerateUUID(),
+					WebSocket:  &websocket.Conn{},
 				}
 
 				storage.AddNewUser(&data)

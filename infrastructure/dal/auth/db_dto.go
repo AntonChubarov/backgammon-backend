@@ -1,4 +1,4 @@
-package dal
+package auth
 
 type UserDBDTO struct {
 	UUID         string `db:"useruuid"`

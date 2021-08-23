@@ -1,4 +1,4 @@
-package dal
+package auth
 
 import "fmt"
 

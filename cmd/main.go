@@ -3,7 +3,7 @@ package main
 import (
 	"backgammon/app/auth"
 	"backgammon/config"
-	"backgammon/infrastructure/dal"
+	"backgammon/infrastructure/dal/auth"
 	"backgammon/infrastructure/dal/migrations"
 	"backgammon/infrastructure/handlers"
 	"fmt"
@@ -15,7 +15,7 @@ import (
 func main() {
 	serverConfig := config.NewServerConfig()
 
-	database := dal.NewDatabaseConnector(serverConfig)
+	database := auth.NewDatabaseConnector(serverConfig)
 	defer database.CloseDatabaseConnection()
 
 	s:=bindata.Resource(migrations.AssetNames(), migrations.Asset)
@@ -26,8 +26,8 @@ func main() {
 		serverConfig.Database.Port,
 		serverConfig.Database.Name), s)
 
-	userStorage := dal.NewDatabaseConnector(serverConfig)
-	mainSessionStorage := dal.NewMainSessionStorage()
+	userStorage := auth.NewDatabaseConnector(serverConfig)
+	mainSessionStorage := auth.NewMainSessionStorage()
 
 	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
