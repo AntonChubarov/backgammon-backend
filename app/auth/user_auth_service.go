@@ -5,7 +5,6 @@ import (
 	domainAuth "backgammon/domain/auth"
 	"backgammon/utils"
 	"github.com/dlclark/regexp2"
-	"log"
 )
 
 type UserAuthService struct {
@@ -54,13 +53,13 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error 
 
 	data.Password, err = uas.hasher.HashString(data.Password)
 	if err != nil {
-		log.Println("In app.RegisterNewUser", err)
+		//log.Println("In app.RegisterNewUser", err)
 		return err
 	}
 
 	err = uas.storage.AddNewUser(data)
 	if err != nil {
-		log.Println("In app.RegisterNewUser", err)
+		//log.Println("In app.RegisterNewUser", err)
 		return err
 	}
 
