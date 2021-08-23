@@ -25,19 +25,17 @@ func NewMainSessionStorage() *MainSessionStorage {
 }
 
 func (mss *MainSessionStorage) AddNewUser(data *auth.UserSessionData) {
-	data.ExpiryTime = time.Now().Add(30 * time.Second)
+	data.ExpiryTime = time.Now().UTC().Add(30 * time.Second)
 
-	//mss.mutex.Lock()
 	mss.storage[data.Token] = data
 	//mss.mutex.Unlock()
 }
 
 func (mss *MainSessionStorage) UpdateTokenExpiryTime(token string) {
-	newExpiryTime := time.Now().Add(30 * time.Second)
-
-	//mss.mutex.RLock()
-	mss.storage[token].ExpiryTime = newExpiryTime
-	//mss.mutex.RUnlock()
+	temp := mss.storage[token]
+	newExpiryTime := time.Now().UTC().Add(30 * time.Second)
+	temp.ExpiryTime = newExpiryTime
+	mss.storage[token] = temp
 }
 
 func (mss *MainSessionStorage) DeleteUserByToken(token string) {
