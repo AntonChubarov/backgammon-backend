@@ -21,9 +21,11 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Register", err)
+		//log.Println("In handlers.UserAuthHandler.Register", err)
 		return echo.ErrBadRequest
 	}
+
+	log.Println("register request from:", request.Username)
 
 	user := ConvertUserRegDataToUser(request)
 	err = uah.userAuthService.RegisterNewUser(user)
@@ -34,7 +36,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	}
 
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Register", err)
+		//log.Println("In handlers.UserAuthHandler.Register", err)
 		return c.JSON(http.StatusInternalServerError, UserRegistrationResponseDTO{Message: err.Error()})
 	}
 
@@ -47,9 +49,11 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 
 	err = c.Bind(&request)
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Authorize", err)
+		//log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return echo.ErrBadRequest
 	}
+
+	log.Println("authorize request from:", request.Username)
 
 	user := ConvertUserRegDataToUser(request)
 
@@ -62,7 +66,7 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	}
 
 	if err != nil {
-		log.Println("In handlers.UserAuthHandler.Authorize", err)
+		//log.Println("In handlers.UserAuthHandler.Authorize", err)
 		return c.JSON(http.StatusInternalServerError, UserAuthorizationResponseDTO{Message: err.Error()})
 	}
 
