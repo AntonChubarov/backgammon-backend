@@ -23,13 +23,14 @@ func NewMainSessionStorage() *MainSessionStorage {
 }
 
 func (mss *MainSessionStorage) AddNewUser(data *auth.UserSessionData) {
-	data.ExpiryTime = time.Now().Add(30 * time.Second)
+	data.ExpiryTime = time.Now().UTC().Add(30 * time.Second)
+
 	mss.storage[data.Token] = data
 }
 
 func (mss *MainSessionStorage) UpdateTokenExpiryTime(token string) {
 	temp := mss.storage[token]
-	newExpiryTime := time.Now().Add(30 * time.Second)
+	newExpiryTime := time.Now().UTC().Add(30 * time.Second)
 	temp.ExpiryTime = newExpiryTime
 	mss.storage[token] = temp
 }
