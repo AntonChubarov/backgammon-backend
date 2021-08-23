@@ -4,6 +4,7 @@ import (
 	"backgammon/app/auth"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
+	"log"
 )
 
 type WebSocketHandler struct {
@@ -22,6 +23,8 @@ func (wsh *WebSocketHandler) Handle(c echo.Context) (err error) {
 	if err != nil {
 		return err
 	}
+
+	log.Println("websocket request with token:", token)
 
 	upgrader := websocket.Upgrader{}
 	var ws *websocket.Conn
