@@ -1,4 +1,4 @@
-package auth
+package temp_session_storage
 
 import (
 	"backgammon/app/auth"

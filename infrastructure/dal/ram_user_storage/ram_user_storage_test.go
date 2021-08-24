@@ -91,7 +91,7 @@ func TestUserStorageRAM_AddNewUser_Concurrent_verify(t *testing.T) {
 	sl3:=makeUserArray(count)
 	sl4:=makeUserArray(count)
 	storage:= NewUserStorageRAM()
-	var wg sync.WaitGroup
+	wg:=sync.WaitGroup{}
 	wg.Add(4)
 
 	rt:= func(sl []authdomain.UserData) {
