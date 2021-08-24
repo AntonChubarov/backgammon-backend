@@ -55,7 +55,7 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserData) error {
 	}
 	data.Password = domainAuth.Password(passwordHash)
 
-	err = uas.storage.AddNewUser(&data)
+	err = uas.storage.AddNewUser(data)
 	if err != nil {
 		//log.Println("In app.RegisterNewUser", err)
 		return err
