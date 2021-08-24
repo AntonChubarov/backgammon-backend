@@ -1,7 +1,7 @@
-package auth
+package user_storage_pgsql
 
 import (
-	auth2 "backgammon/app/auth"
+	"backgammon/app/auth"
 	"backgammon/config"
 	"backgammon/domain/authdomain"
 	"fmt"
@@ -11,11 +11,35 @@ import (
 	"log"
 )
 
-type DatabaseConnector struct {
+var ErrorMoreThanOneUsernameRecord = fmt.Errorf("more than one user with this username, report to developers was automatically send")
+
+type UserDBDTO struct {
+	UUID         string `db:"useruuid"`
+	Username     string `db:"username"`
+	PasswordHash string `db:"userpassword"`
+}
+
+func userDataToUserDBDTO(user authdomain.UserData) UserDBDTO {
+	return UserDBDTO{
+		UUID:         string(user.UUID),
+		Username:     string(user.UserName),
+		PasswordHash: string(user.Password),
+	}
+}
+
+func userDBDTOToUserData(user UserDBDTO) authdomain.UserData {
+	return authdomain.UserData{
+		UUID:     authdomain.UUID(user.UUID),
+		UserName: authdomain.UserName(user.Username),
+		Password: authdomain.Password(user.PasswordHash),
+	}
+}
+
+type UserDataStoragePGSQL struct {
 	Database *sqlx.DB
 }
 
-func NewDatabaseConnector(config *config.ServerConfig) *DatabaseConnector {
+func NewUserDataStoragePGSQL(config *config.ServerConfig) *UserDataStoragePGSQL {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		config.Database.Host,
 		config.Database.Port,
@@ -34,20 +58,20 @@ func NewDatabaseConnector(config *config.ServerConfig) *DatabaseConnector {
 		panic(err)
 	}
 
-	return &DatabaseConnector{
+	return &UserDataStoragePGSQL{
 		Database: db,
 	}
 }
 
-func (d *DatabaseConnector) CloseDatabaseConnection() {
+func (d *UserDataStoragePGSQL) CloseDatabaseConnection() {
 	err := d.Database.Close()
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (d *DatabaseConnector) AddNewUser(data *authdomain.UserData) error {
-	userDTO := UserDataToUserDBDTO(*data)
+func (d *UserDataStoragePGSQL) AddNewUser(data *authdomain.UserData) error {
+	userDTO := userDataToUserDBDTO(*data)
 
 	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
 		userDTO)
@@ -59,7 +83,7 @@ func (d *DatabaseConnector) AddNewUser(data *authdomain.UserData) error {
 	return nil
 }
 
-func (d *DatabaseConnector) GetUserByUsername(username authdomain.UserName) (*authdomain.UserData, error) {
+func (d *UserDataStoragePGSQL) GetUserByUsername(username authdomain.UserName) (*authdomain.UserData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
@@ -68,19 +92,19 @@ func (d *DatabaseConnector) GetUserByUsername(username authdomain.UserName) (*au
 		return &authdomain.UserData{}, err
 	}
 	if users == nil {
-		return &authdomain.UserData{}, ErrorNoUserInDatabase
+		return &authdomain.UserData{}, auth.ErrorUserNotRegistered
 	}
 	if len(users) == 1 {
-		user := UserDBDTOToUserData(users[0])
+		user := userDBDTOToUserData(users[0])
 		return &user, nil
 	}
 	if len(users) > 1 {
 		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return &authdomain.UserData{}, auth2.ErrorUserNotRegistered
+	return &authdomain.UserData{}, auth.ErrorUserNotRegistered
 }
 
-func (d *DatabaseConnector) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
+func (d *UserDataStoragePGSQL) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where useruuid = $1", string(uuid))
@@ -89,20 +113,29 @@ func (d *DatabaseConnector) GetUserByUUID(uuid authdomain.UUID) (*authdomain.Use
 		return &authdomain.UserData{}, err
 	}
 	if users == nil {
-		return &authdomain.UserData{}, ErrorNoUserInDatabase
+		return &authdomain.UserData{}, auth.ErrorUserNotRegistered
 	}
 	if len(users) == 1 {
-		user := UserDBDTOToUserData(users[0])
+		user := userDBDTOToUserData(users[0])
 		return &user, nil
 	}
 	if len(users) > 1 {
 		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return &authdomain.UserData{}, auth2.ErrorUserNotRegistered
+	return &authdomain.UserData{}, auth.ErrorUserNotRegistered
 }
 
-func (d *DatabaseConnector) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
-	userDTO := UserDataToUserDBDTO(*data)
+func (d *UserDataStoragePGSQL) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
+	//oldUser, err := d.GetUserByUUID(uuid)
+	//if err != nil {
+	//	return err
+	//}
+	//oldUserDTO := userDataToUserDBDTO(*oldUser)
+	//
+	//for
+
+	userDTO := userDataToUserDBDTO(*data)
+	userDTO.UUID=string(uuid)
 
 	_, err := d.Database.NamedExec(`UPDATE users SET username=:username, userpassword=:userpassword WHERE useruuid=:useruuid`,
 		userDTO)
@@ -113,7 +146,7 @@ func (d *DatabaseConnector) UpdateUser(uuid authdomain.UUID, data *authdomain.Us
 	return nil
 }
 
-func (d *DatabaseConnector) RemoveUser(uuid authdomain.UUID) error {
+func (d *UserDataStoragePGSQL) RemoveUser(uuid authdomain.UUID) error {
 	_, err := d.Database.Exec("DELETE FROM users WHERE useruuid=$1", uuid)
 	if err != nil {
 		//log.Println("In dal.AddNewUser", err)
