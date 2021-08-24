@@ -18,7 +18,7 @@ type UserData struct {
 
 
 
-type UserSessionData struct {
+type SessionData struct {
 	UUID
 	Token
 	RoomID
