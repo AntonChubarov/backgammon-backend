@@ -83,57 +83,49 @@ func (d *UserDataStoragePGSQL) AddNewUser(data *authdomain.UserData) error {
 	return nil
 }
 
-func (d *UserDataStoragePGSQL) GetUserByUsername(username authdomain.UserName) (*authdomain.UserData, error) {
+func (d *UserDataStoragePGSQL) GetUserByUsername(username authdomain.UserName) (authdomain.UserData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where username = $1", username)
 	if err != nil {
 		//log.Println("In dal.GetUserByUsername", err)
-		return &authdomain.UserData{}, err
+		return authdomain.UserData{}, err
 	}
 	if users == nil {
-		return &authdomain.UserData{}, auth.ErrorUserNotRegistered
+		return authdomain.UserData{}, auth.ErrorUserNotRegistered
 	}
 	if len(users) == 1 {
 		user := userDBDTOToUserData(users[0])
-		return &user, nil
+		return user, nil
 	}
 	if len(users) > 1 {
-		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
+		return authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return &authdomain.UserData{}, auth.ErrorUserNotRegistered
+	return authdomain.UserData{}, auth.ErrorUserNotRegistered
 }
 
-func (d *UserDataStoragePGSQL) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
+func (d *UserDataStoragePGSQL) GetUserByUUID(uuid authdomain.UUID) (authdomain.UserData, error) {
 	var users []UserDBDTO
 
 	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where useruuid = $1", string(uuid))
 	if err != nil {
 		//log.Println("In dal.GetUserByUsername", err)
-		return &authdomain.UserData{}, err
+		return authdomain.UserData{}, err
 	}
 	if users == nil {
-		return &authdomain.UserData{}, auth.ErrorUserNotRegistered
+		return authdomain.UserData{}, auth.ErrorUserNotRegistered
 	}
 	if len(users) == 1 {
 		user := userDBDTOToUserData(users[0])
-		return &user, nil
+		return user, nil
 	}
 	if len(users) > 1 {
-		return &authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
+		return authdomain.UserData{}, ErrorMoreThanOneUsernameRecord
 	}
-	return &authdomain.UserData{}, auth.ErrorUserNotRegistered
+	return authdomain.UserData{}, auth.ErrorUserNotRegistered
 }
 
 func (d *UserDataStoragePGSQL) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
-	//oldUser, err := d.GetUserByUUID(uuid)
-	//if err != nil {
-	//	return err
-	//}
-	//oldUserDTO := userDataToUserDBDTO(*oldUser)
-	//
-	//for
-
 	userDTO := userDataToUserDBDTO(*data)
 	userDTO.UUID=string(uuid)
 

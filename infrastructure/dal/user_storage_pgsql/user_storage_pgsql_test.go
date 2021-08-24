@@ -52,7 +52,7 @@ func TestUserStoragePGSQL_AddNewUser_single(t *testing.T) {
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
 	assert.Equal(t, nil, err)
 	assert.NotNil(t, readUser)
-	assert.Equal(t, userData, *readUser)
+	assert.Equal(t, userData, readUser)
 }
 
 func TestUserStoragePGSQL_AddNewUser_duplicate(t *testing.T) {
@@ -160,7 +160,7 @@ func TestUserStoragePGSQL_AddNewUser_Concurrent_verify(t *testing.T) {
 	for i:=range sl {
 		user, err:= storage.GetUserByUUID(sl[i].UUID)
 		assert.Nil(t, err)
-		assert.Equal (t, sl[i],  *user )
+		assert.Equal (t, sl[i],  user )
 	}
 }
 
@@ -191,7 +191,7 @@ func TestUserStoragePGSQL_ConcurrentRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUUID(sl[i].UUID)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -200,7 +200,7 @@ func TestUserStoragePGSQL_ConcurrentRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUsername(sl[i].UserName)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 	wg.Add(3)
@@ -230,12 +230,12 @@ func TestUserDataStoragePGSQL_RemoveUser_single(t *testing.T) {
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
 	assert.Equal(t, nil, err)
 	assert.NotNil(t, readUser)
-	assert.Equal(t, userData, *readUser)
+	assert.Equal(t, userData, readUser)
 
 	err2:=storage.RemoveUser(userData.UUID)
 	assert.Nil(t, err2)
 	readUser2, err3:=storage.GetUserByUUID(userData.UUID)
-	assert.Equal(t, authdomain.UserData{}, *readUser2)
+	assert.Equal(t, authdomain.UserData{}, readUser2)
 	assert.Equal(t, auth.ErrorUserNotRegistered, err3)
 
 }
@@ -268,14 +268,14 @@ func TestUserDataStoragePGSQL_UpdateUser_single(t *testing.T) {
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
 	assert.Equal(t, nil, err)
 	assert.NotNil(t, readUser)
-	assert.Equal(t, userData, *readUser)
+	assert.Equal(t, userData, readUser)
 
 	err2:=storage.UpdateUser(userData.UUID, &userData2)
 	assert.Nil(t, err2)
 	readUser2, err3:=storage.GetUserByUUID(userData.UUID)
 	userData2.UUID=userData.UUID
 	assert.Nil(t, err3)
-	assert.Equal(t, userData2, *readUser2)
+	assert.Equal(t, userData2, readUser2)
 }
 
 func TestUserStoragePGSQL_FullRandomAccess_prepare (t *testing.T) {
@@ -352,7 +352,7 @@ func TestUserStoragePGSQL_FullRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUUID(sl[i].UUID)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -361,7 +361,7 @@ func TestUserStoragePGSQL_FullRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUsername(sl[i].UserName)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -410,7 +410,7 @@ func TestUserStoragePGSQL_GetUserByUUID_single(t *testing.T) {
 
 	readUser, err2:=storage.GetUserByUUID(userData.UUID)
 	assert.Nil(t, err2)
-	assert.Equal(t, userData, *readUser)
+	assert.Equal(t, userData, readUser)
 
 }
 
