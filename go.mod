@@ -3,10 +3,9 @@ module backgammon
 go 1.16
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.7.0 // indirect
+	github.com/brianvoe/gofakeit/v6 v6.7.0
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
