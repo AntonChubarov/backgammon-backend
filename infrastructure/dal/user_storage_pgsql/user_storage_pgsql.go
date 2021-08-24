@@ -70,8 +70,8 @@ func (d *UserDataStoragePGSQL) CloseDatabaseConnection() {
 	}
 }
 
-func (d *UserDataStoragePGSQL) AddNewUser(data *authdomain.UserData) error {
-	userDTO := userDataToUserDBDTO(*data)
+func (d *UserDataStoragePGSQL) AddNewUser(data authdomain.UserData) error {
+	userDTO := userDataToUserDBDTO(data)
 
 	_, err := d.Database.NamedExec("insert into users (useruuid, username, userpassword) values (:useruuid, :username, :userpassword)",
 		userDTO)

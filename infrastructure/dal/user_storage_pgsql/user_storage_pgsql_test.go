@@ -46,7 +46,7 @@ func TestUserStoragePGSQL_AddNewUser_single(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(password),
 	}
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
@@ -67,8 +67,8 @@ func TestUserStoragePGSQL_AddNewUser_duplicate(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(password),
 	}
-	err:=storage.AddNewUser(&userData)
-	err2:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
+	err2:=storage.AddNewUser(userData)
 	assert.Nil(t, err)
 	assert.NotNil(t, err2)
 }
@@ -87,7 +87,7 @@ func TestUserStoragePGSQL_AddNewUser_NonConcurrent(t *testing.T) {
 			UserName: authdomain.UserName(gofakeit.Password(true, true, true, false, false, 32)),
 			Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 		}
-		err:=storage.AddNewUser(&userData)
+		err:=storage.AddNewUser(userData)
 		assert.Equal(t, nil, err)
 	}
 
@@ -110,7 +110,7 @@ func TestUserStoragePGSQL_AddNewUser_Concurrent(t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			assert.Nil(t, storage.AddNewUser(&sl[i]))
+			assert.Nil(t, storage.AddNewUser(sl[i]))
 		}
 	}
 	go rt(sl1)
@@ -140,7 +140,7 @@ func TestUserStoragePGSQL_AddNewUser_Concurrent_verify(t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
@@ -178,7 +178,7 @@ func TestUserStoragePGSQL_ConcurrentRandomAccess (t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
@@ -224,7 +224,7 @@ func TestUserDataStoragePGSQL_RemoveUser_single(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(password),
 	}
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
@@ -262,7 +262,7 @@ func TestUserDataStoragePGSQL_UpdateUser_single(t *testing.T) {
 	}
 
 
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
@@ -336,7 +336,7 @@ func TestUserStoragePGSQL_FullRandomAccess (t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
@@ -405,7 +405,7 @@ func TestUserStoragePGSQL_GetUserByUUID_single(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 	}
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err2:=storage.GetUserByUUID(userData.UUID)
