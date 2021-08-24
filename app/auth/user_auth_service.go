@@ -66,7 +66,7 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserData) error {
 
 func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserData) (token string, err error) {
 	token = ""
-	var user *domainAuth.UserData
+	var user domainAuth.UserData
 
 	user, err = uas.storage.GetUserByUsername(data.UserName)
 	if err != nil {
