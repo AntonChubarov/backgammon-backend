@@ -31,7 +31,7 @@ func TestAddNewUser(t *testing.T) {
 				data = auth.UserSessionData{
 					Token:      tokenGenerator.GenerateToken(),
 					ExpiryTime: time.Now().UTC().Add(30 * time.Second),
-					UserUUID:   utils.GenerateUUID(),
+					UserUUID:   string(utils.GenerateUUID()),
 					WebSocket:  &websocket.Conn{},
 				}
 

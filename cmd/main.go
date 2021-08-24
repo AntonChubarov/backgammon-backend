@@ -5,6 +5,7 @@ import (
 	"backgammon/config"
 	"backgammon/infrastructure/dal/auth"
 	"backgammon/infrastructure/dal/migrations"
+	"backgammon/infrastructure/dal/ram_user_storage"
 	"backgammon/infrastructure/handlers"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
@@ -26,7 +27,8 @@ func main() {
 		serverConfig.Database.Port,
 		serverConfig.Database.Name), s)
 
-	userStorage := auth.NewDatabaseConnector(serverConfig)
+	//userStorage := auth.NewDatabaseConnector(serverConfig)
+	userStorage := ram_user_storage.NewUserStorageRAM()
 	mainSessionStorage := auth.NewMainSessionStorage()
 
 	tokenGenerator := auth2.NewTokenGeneratorFlex(serverConfig)

@@ -83,7 +83,7 @@ func (d *DatabaseConnector) GetUserByUsername(username authdomain.UserName) (*au
 func (d *DatabaseConnector) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
 	var users []UserDBDTO
 
-	err := d.Database.Select(&users, "select username, userpassword from users where useruuid = $1", string(uuid))
+	err := d.Database.Select(&users, "select username, userpassword, useruuid from users where useruuid = $1", string(uuid))
 	if err != nil {
 		//log.Println("In dal.GetUserByUsername", err)
 		return &authdomain.UserData{}, err
@@ -102,9 +102,22 @@ func (d *DatabaseConnector) GetUserByUUID(uuid authdomain.UUID) (*authdomain.Use
 }
 
 func (d *DatabaseConnector) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
-	panic("implement me")
+	userDTO := UserDataToUserDBDTO(*data)
+
+	_, err := d.Database.NamedExec(`UPDATE users SET username=:username, userpassword=:userpassword WHERE useruuid=:useruuid`,
+		userDTO)
+	if err != nil {
+		//log.Println("In dal.AddNewUser", err)
+		return err
+	}
+	return nil
 }
 
 func (d *DatabaseConnector) RemoveUser(uuid authdomain.UUID) error {
-	panic("implement me")
+	_, err := d.Database.Exec("DELETE FROM users WHERE useruuid=$1", uuid)
+	if err != nil {
+		//log.Println("In dal.AddNewUser", err)
+		return err
+	}
+	return nil
 }
