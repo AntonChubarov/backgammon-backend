@@ -1,7 +1,7 @@
 package main
 
 import (
-	auth2 "backgammon/app/auth"
+	"backgammon/app/auth"
 	"backgammon/config"
 	"backgammon/infrastructure/dal/migrations"
 	"backgammon/infrastructure/dal/ram_user_storage"
@@ -32,10 +32,10 @@ func main() {
 	userStorage := ram_user_storage.NewUserStorageRAM()
 	mainSessionStorage := temp_session_storage.NewMainSessionStorage()
 
-	tokenGenerator := auth2.NewTokenGeneratorFlex(serverConfig)
+	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
-	userAuthService := auth2.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
-	userWebSocketManageService := auth2.NewWebSocketManageService(mainSessionStorage)
+	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
+	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
 
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 	lobbyHandler := handlers.NewLobbyHandler(userAuthService)

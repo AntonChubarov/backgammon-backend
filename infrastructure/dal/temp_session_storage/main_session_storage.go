@@ -9,7 +9,7 @@ import (
 )
 
 type MainSessionStorage struct {
-	storage map[string]*auth.UserSessionData
+	storage map[string]*auth.SessionData
 	mutex sync.RWMutex
 }
 

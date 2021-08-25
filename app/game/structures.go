@@ -1,7 +1,7 @@
 package game
 
 import (
-	"backgammon/app/auth"
+	"backgammon/domain/authdomain"
 	"backgammon/domain/board"
 	"backgammon/domain/game"
 	"backgammon/utils"
@@ -35,7 +35,7 @@ type Room struct {
 	Players []PlayerInterface
 	game.Game
 	Spectators []Spectator
-	UUID string
+	UUID authdomain.UUID
 	Name string
 	LobbyInterface
 }
@@ -65,7 +65,7 @@ type RoomStorage interface {
 
 type LobbyBase struct {
 	RoomStorage
-	UserSessionStorage auth.SessionStorage
+	UserSessionStorage authdomain.SessionStorage
 }
 
 type LobbyInterface interface {
