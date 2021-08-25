@@ -2,8 +2,8 @@ package game
 
 import "fmt"
 
-// (+) 1. Ходит не в свою очередь
-// (+) 2. Ход вне игры (до начала, или после конца, или ???)
+// (+)(+) 1. Ходит не в свою очередь
+// (+)(+) 2. Ход вне игры (до начала, или после конца, или ???)
 // -----ошибки движений
 // (+)(+)3. Попытка походить не своей фишкой /Rule003
 // (+)(+)4. Попытка походить не в том направлении (или с пересечением границы поля, или в ту же лунку)
@@ -41,13 +41,8 @@ var ErrorImpossibleMoveKindInGamePhase = fmt.Errorf("attempt to make move, which
 
 var ErrorIncorrectMoveFormat = fmt.Errorf("incorrect move data received")
 
-var ErrorBlockingFence  = fmt.Errorf("attempt to build blocking fence at the end of turn")
+var ErrorBlockingFence = fmt.Errorf("attempt to build blocking fence at the end of turn")
 var ErrorIncompleteTurn = fmt.Errorf("attempt to make incomplete turn")
 var ErrorIncorrectTurnSerialNumber = fmt.Errorf("turn with incorrect serial number received")
 var ErrorTooMuchStepsInTurn = fmt.Errorf("attempt to make incomplete turn")
 var ErrorMoveFromHeadLimit1 = fmt.Errorf("attempt to use more than 1 stick from head due turn")
-
-
-
-
-

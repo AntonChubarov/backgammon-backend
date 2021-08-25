@@ -1,5 +1,13 @@
 package game
 
+type RuleMatchOrder struct {
+	nextRule GameRule
+}
+
+type RuleCorrectGamePhase struct {
+	nextRule GameRule
+}
+
 type RuleMoveMatchStickColor struct {
 	nextRule MovingRule
 }
