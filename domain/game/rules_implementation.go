@@ -140,3 +140,53 @@ func (r *RuleForbiddenMoveKindLongBackgammon) ValidateRule(g *Game, c board.Stic
 	return r.nextRule.ValidateRule(g, c, m, consumedDice)
 
 }
+
+// Should be updated
+func (r *RuleMoveFormat) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
+	moveRangeCheckFail := m.From < 1 ||
+				m.From > 24 ||
+				m.To < 1 ||
+				m.To > 24
+
+	moveTypeCheckFail := m.MoveKind != board.Movement &&
+				m.MoveKind != board.Removing &&
+				m.MoveKind != board.Surrender
+
+	if moveTypeCheckFail || moveRangeCheckFail {
+		return ErrorIncorrectMoveFormat
+	}
+	return nil
+}
+
+func (r *RuleTooMuchSteps) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+	expectedStepsNumber := 2
+	if g.Dice1 == g.Dice2 {
+		expectedStepsNumber = 4
+	}
+	if len(t.Moves) > expectedStepsNumber {
+		return ErrorTooMuchStepsInTurn
+	}
+	return nil
+}
+
+func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+	headCount := 0
+	if c == board.Black {
+		for i := range t.Moves {
+			if t.Moves[i].From == 1 {
+				headCount++
+			}
+		}
+	}
+	if c == board.White {
+		for i := range t.Moves {
+			if t.Moves[i].From == 13 {
+				headCount++
+			}
+		}
+	}
+	if headCount > 1 {
+		return ErrorMoveFromHeadLimit1
+	}
+	return nil
+}

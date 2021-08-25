@@ -31,3 +31,15 @@ type RuleMoveFromEmptyHole struct {
 type RuleForbiddenMoveKindLongBackgammon struct {
 	nextRule MovingRule
 }
+
+type RuleMoveFormat struct {
+	nextRule MovingRule
+}
+
+type RuleTooMuchSteps struct {
+	nextRule TurnRule
+}
+
+type RuleAttemptToGetFewSticksFromHead struct{
+	nextRule TurnRule
+}

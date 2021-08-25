@@ -26,7 +26,19 @@ func (r *RuleMoveFromEmptyHole) SetNextRule(mr MovingRule) {
 	r.nextRule = mr
 }
 
+func (r *RuleMoveFormat) SetNextRule(mr MovingRule) {
+	r.nextRule = mr
+}
+
 // Need to check this type
 //func (r *RuleForbiddenMoveKindInGameType) SetNextRule(mr MovingRule) {
 //	r.nextRule=mr
 //}
+
+func (r *RuleTooMuchSteps) SetNextRule (tr TurnRule) {
+	r.nextRule = tr
+}
+
+func (r *RuleAttemptToGetFewSticksFromHead) SetNextRule (tr TurnRule) {
+	r.nextRule = tr
+}
