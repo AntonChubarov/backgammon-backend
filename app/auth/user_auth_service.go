@@ -66,7 +66,6 @@ func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 }
 
 func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authdomain.Token, err error) {
-	token = ""
 	var user authdomain.UserData
 
 	user, err = uas.storage.GetUserByUsername(data.UserName)
@@ -86,21 +85,25 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 	}
 
 	session, err := uas.mainSessionStorage.GetSessionSByUUID(user.UUID)
-	if err == ErrorNoActiveSessions {
-		token = authdomain.Token(uas.tokenGenerator.GenerateToken())
-		tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
-		err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
-		return token, err
+	if err == nil {
+		if time.Time(session.ExpiryTime).After(time.Now().UTC()) {
+			session.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
+			uas.mainSessionStorage.UpdateSession(session.Token, session)
+			return session.Token, nil
+		}
+		err = uas.mainSessionStorage.DeleteSession(session.Token)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	if time.Time(session.ExpiryTime).Before(time.Now().UTC()) {
-
-	}
 	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
-	uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token})
-	return
+	tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
+	err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
+	return token, err
 }
 
+// Need to be refactored
 func (uas *UserAuthService) CheckToken(token authdomain.Token) error {
 	_, err := uas.mainSessionStorage.GetSessionByToken(token)
 	if err != nil {
