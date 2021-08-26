@@ -10,6 +10,7 @@ import (
 type gameRuleTestCase struct {
 	Game          *Game
 	Color         board.StickColor
+	Turn          board.Turn
 	ExpectedError error
 }
 
@@ -60,7 +61,7 @@ func TestRuleMatchOrder(t *testing.T) {
 	rule := RuleMatchOrder{}
 
 	for i := range cases {
-		assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color))
+		assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color, &board.Turn{}))
 	}
 }
 
@@ -78,14 +79,14 @@ func TestRuleCorrectGamePhase(t *testing.T) {
 				State: NotStarted,
 			},
 			Color:         board.Black,
-			ExpectedError: ErrorUotOfGame,
+			ExpectedError: ErrorOutOfGame,
 		},
 		{
 			Game: &Game{
 				State: Finished,
 			},
 			Color:         board.Black,
-			ExpectedError: ErrorUotOfGame,
+			ExpectedError: ErrorOutOfGame,
 		},
 		{
 			Game: &Game{
@@ -99,21 +100,53 @@ func TestRuleCorrectGamePhase(t *testing.T) {
 				State: NotStarted,
 			},
 			Color:         board.White,
-			ExpectedError: ErrorUotOfGame,
+			ExpectedError: ErrorOutOfGame,
 		},
 		{
 			Game: &Game{
 				State: Finished,
 			},
 			Color:         board.White,
-			ExpectedError: ErrorUotOfGame,
+			ExpectedError: ErrorOutOfGame,
 		},
 	}
 
 	rule := RuleCorrectGamePhase{}
 
 	for i := range cases {
-		assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color))
+		assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color, &board.Turn{}))
+	}
+}
+
+func TestRuleMatchTurnNumber(t *testing.T) {
+	cases := []gameRuleTestCase{
+		{
+			Game: &Game{
+				AwaitingTurnNumber: 1,
+			},
+			Turn:          board.Turn{TurnNumber: 1},
+			ExpectedError: nil,
+		},
+		{
+			Game: &Game{
+				AwaitingTurnNumber: 1,
+			},
+			Turn:          board.Turn{TurnNumber: 0},
+			ExpectedError: ErrorInvalidTurnNumber,
+		},
+		{
+			Game: &Game{
+				AwaitingTurnNumber: 1,
+			},
+			Turn:          board.Turn{TurnNumber: 2},
+			ExpectedError: ErrorInvalidTurnNumber,
+		},
+	}
+
+		rule := RuleMatchTurnNumber{}
+
+		for i := range cases {
+			assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color, &cases[i].Turn))
 	}
 }
 
@@ -184,7 +217,6 @@ func TestRuleMoveMatchStickColor(t *testing.T) {
 	}
 }
 
-// Should be updated
 func TestRuleMoveFormat(t *testing.T) {
 	cases := []testCase{
 		{
@@ -208,7 +240,11 @@ func TestRuleMoveFormat(t *testing.T) {
 			ExpectedError: ErrorIncorrectMoveFormat,
 		},
 		{
-			Move:          &board.Move{MoveKind: board.Removing, From: 24, To: 1}, // Clear removing process
+			Move:          &board.Move{MoveKind: board.Removing, From: 24, To: 1},
+			ExpectedError: ErrorIncorrectMoveFormat,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 24, To: 0},
 			ExpectedError: nil,
 		},
 		{
@@ -234,7 +270,64 @@ func TestRuleMoveFormat(t *testing.T) {
 
 	rule := RuleMoveFormat{}
 	for i := range cases {
-		log.Println("test case: ", i)
+		expected := cases[i].ExpectedError
+		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestRuleRemovingNotFromHome(t *testing.T) {
+	cases := []testCase{
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 24, To: 0},
+			ExpectedError: nil,
+			color: board.Black,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 19, To: 0},
+			ExpectedError: nil,
+			color: board.Black,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 18, To: 0},
+			ExpectedError: ErrorRemovingFromInvalidHole,
+			color: board.Black,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 12, To: 0},
+			ExpectedError: nil,
+			color: board.White,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 7, To: 0},
+			ExpectedError: nil,
+			color: board.White,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing, From: 6, To: 0},
+			ExpectedError: ErrorRemovingFromInvalidHole,
+			color: board.White,
+		},
+	}
+
+	gameBoard := board.Board{}
+	gameBoard.Clear()
+	for i := 19; i <=24; i++ {
+		gameBoard.Holes[i].StickColor = board.Black
+		gameBoard.Holes[i].StickCount = 2
+	}
+
+	for i := 7; i <=12; i++ {
+		gameBoard.Holes[i].StickColor = board.White
+		gameBoard.Holes[i].StickCount = 2
+	}
+
+	g := &Game{Board: gameBoard}
+
+	var consumedDice []int
+
+	rule := RuleRemovingNotFromHome{}
+	for i := range cases {
 		expected := cases[i].ExpectedError
 		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
 		assert.Equal(t, expected, actual)

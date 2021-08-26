@@ -3,7 +3,7 @@ package game
 import "backgammon/domain/board"
 
 type GameRule interface {
-	ValidateRule(g *Game, c board.StickColor) error
+	ValidateRule(g *Game, c board.StickColor, t *board.Turn) error
 	SetNextRule(gr GameRule)
 }
 

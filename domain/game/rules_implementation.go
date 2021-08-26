@@ -7,7 +7,7 @@ import (
 )
 
 //Rule001
-func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor) error {
+func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
 	if g.CurrentTurn != c {
 		return ErrorOutOfTurn
 	}
@@ -15,9 +15,16 @@ func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor) error {
 }
 
 //Rule002
-func (r *RuleCorrectGamePhase) ValidateRule(g *Game, c board.StickColor) error {
+func (r *RuleCorrectGamePhase) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
 	if g.State != InProcess {
-		return ErrorUotOfGame
+		return ErrorOutOfGame
+	}
+	return nil
+}
+
+func (r *RuleMatchTurnNumber) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+	if g.AwaitingTurnNumber != t.TurnNumber {
+		return ErrorInvalidTurnNumber
 	}
 	return nil
 }
@@ -141,19 +148,36 @@ func (r *RuleForbiddenMoveKindLongBackgammon) ValidateRule(g *Game, c board.Stic
 
 }
 
-// Should be updated
 func (r *RuleMoveFormat) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
-	moveRangeCheckFail := m.From < 1 ||
-				m.From > 24 ||
-				m.To < 1 ||
-				m.To > 24
-
 	moveTypeCheckFail := m.MoveKind != board.Movement &&
-				m.MoveKind != board.Removing &&
-				m.MoveKind != board.Surrender
+		m.MoveKind != board.Removing &&
+		m.MoveKind != board.Surrender
 
-	if moveTypeCheckFail || moveRangeCheckFail {
+	if moveTypeCheckFail {
 		return ErrorIncorrectMoveFormat
+	}
+
+	if m.MoveKind == board.Movement {
+		if m.From < 1 || m.From > 24 ||	m.To < 1 ||	m.To > 24 {
+			return ErrorIncorrectMoveFormat
+		}
+	}
+
+	if m.MoveKind == board.Removing {
+		if m.From < 1 || m.From > 24 ||	m.To != 0 {
+			return ErrorIncorrectMoveFormat
+		}
+	}
+
+	return nil
+}
+
+func (r *RuleRemovingNotFromHome) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
+	if c == board.White {
+		m.From = board.InvertNumeration(m.From)
+	}
+	if m.From < 19 {
+		return ErrorRemovingFromInvalidHole
 	}
 	return nil
 }

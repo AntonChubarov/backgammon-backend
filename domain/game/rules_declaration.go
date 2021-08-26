@@ -8,6 +8,10 @@ type RuleCorrectGamePhase struct {
 	nextRule GameRule
 }
 
+type RuleMatchTurnNumber struct {
+	nextRule GameRule
+}
+
 type RuleMoveMatchStickColor struct {
 	nextRule MovingRule
 }
@@ -33,6 +37,10 @@ type RuleForbiddenMoveKindLongBackgammon struct {
 }
 
 type RuleMoveFormat struct {
+	nextRule MovingRule
+}
+
+type RuleRemovingNotFromHome struct {
 	nextRule MovingRule
 }
 

@@ -8,6 +8,10 @@ func (r *RuleCorrectGamePhase) SetNextRule(gr GameRule) {
 	r.nextRule = gr
 }
 
+func (r *RuleMatchTurnNumber) SetNextRule(gr GameRule) {
+	r.nextRule = gr
+}
+
 func (r *RuleMoveMatchStickColor) SetNextRule(mr MovingRule) {
 	r.nextRule = mr
 }
@@ -27,6 +31,10 @@ func (r *RuleMoveFromEmptyHole) SetNextRule(mr MovingRule) {
 }
 
 func (r *RuleMoveFormat) SetNextRule(mr MovingRule) {
+	r.nextRule = mr
+}
+
+func (r *RuleRemovingNotFromHome) SetNextRule(mr MovingRule) {
 	r.nextRule = mr
 }
 
