@@ -85,7 +85,7 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 	}
 
 	session, err := uas.mainSessionStorage.GetSessionSByUUID(user.UUID)
-<<<<<<< Updated upstream
+
 	if err == nil {
 		if time.Time(session.ExpiryTime).After(time.Now().UTC()) {
 			session.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
@@ -96,14 +96,8 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 		if err != nil {
 			return "", err
 		}
-=======
 
-	if err == ErrorNoActiveSessions {
-		token = authdomain.Token(uas.tokenGenerator.GenerateToken())
-		tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
-		err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
-		return token, err
->>>>>>> Stashed changes
+
 	}
 
 	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
