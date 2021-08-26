@@ -11,10 +11,10 @@ import (
 )
 
 var conf = config.ServerConfig{
-		Token: config.TokenConfig{
-			TokenLength: 16,
-			TokenSymbols: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"},
-			}
+	Token: config.TokenConfig{
+		TokenLength:  16,
+		TokenSymbols: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"},
+}
 
 var generator = NewTokenGeneratorFlex(&conf)
 
@@ -24,7 +24,7 @@ func TestGenerateToken(t *testing.T) {
 	tokenRegex := fmt.Sprintf("^[a-zA-Z0-9]{%d}$", conf.Token.TokenLength)
 
 	for i := 0; i < n; i++ {
-		token= generator.GenerateToken()
+		token = generator.GenerateToken()
 		isValid, err := regexp.MatchString(tokenRegex, token)
 		if err != nil {
 			log.Println(err)
@@ -46,5 +46,17 @@ func TestTokenGenerationUniqueness(t *testing.T) {
 
 		assert.True(t, isUnique)
 		tokens = append(tokens, token)
+	}
+}
+
+func TestTokenGeneratorFlex_Multi(t *testing.T) {
+	for i := 0; i < 6; i++ {
+		go func() {
+			for j := 0; j < 10000; j++ {
+				token := generator.GenerateToken()
+				assert.Greater(t, len(token), 0)
+				assert.True(t, true)
+			}
+		}()
 	}
 }
