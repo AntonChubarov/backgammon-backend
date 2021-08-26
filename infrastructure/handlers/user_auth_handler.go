@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backgammon/app/auth"
+	"backgammon/domain/authdomain"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ type UserAuthHandler struct {
 func NewUserAuthHandler(service *auth.UserAuthService) *UserAuthHandler {
 	return &UserAuthHandler{userAuthService: service}
 }
+
 
 func (uah *UserAuthHandler) Register(c echo.Context) error {
 	var err error
@@ -43,6 +45,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserRegistrationResponseDTO{Message: "Successfully registered"})
 }
 
+
 func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var err error
 	var request UserAuthRequestDTO
@@ -57,8 +60,7 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 
 	user := ConvertUserRegDataToUser(request)
 
-	var token string
-	token, err = uah.userAuthService.AuthorizeUser(user)
+	token, err := uah.userAuthService.AuthorizeUser(user)
 
 	if err == auth.ErrorUserNotRegistered || err == auth.ErrorInvalidPassword {
 		errStr := err.Error()
@@ -70,15 +72,26 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, UserAuthorizationResponseDTO{Message: err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, UserAuthorizationResponseDTO{Message: "Authorized", Token: token})
+	return c.JSON(http.StatusOK, UserAuthorizationResponseDTO{Message: "Authorized", Token: string(token)})
 }
+
 
 func (uah *UserAuthHandler) ProlongToken(c echo.Context) error {
 
 	panic("Implement me")
 }
 
+
 func (uah *UserAuthHandler) Logout(c echo.Context) error {
 
 	panic("Implement me")
+}
+
+
+func ConvertUserRegDataToUser(user UserAuthRequestDTO) authdomain.UserData {
+	return authdomain.UserData{
+		UUID: "",
+		UserName: authdomain.UserName(user.Username),
+		Password: authdomain.Password(user.Password),
+	}
 }

@@ -2,14 +2,14 @@ package auth
 
 import (
 	"backgammon/config"
-	domainAuth "backgammon/domain/auth"
+	"backgammon/domain/authdomain"
 	"backgammon/utils"
 	"github.com/dlclark/regexp2"
 )
 
 type UserAuthService struct {
-	storage            domainAuth.UserDataStorage
-	mainSessionStorage SessionStorage
+	storage            authdomain.UserStorage
+	mainSessionStorage authdomain.SessionStorage
 	config             *config.ServerConfig
 	hasher             StringHasher
 	tokenGenerator     TokenGenerator
@@ -17,8 +17,8 @@ type UserAuthService struct {
 	passwordRegexp *regexp2.Regexp
 }
 
-func NewUserAuthService(storage domainAuth.UserDataStorage,
-	mainSessionStorage SessionStorage,
+func NewUserAuthService(storage authdomain.UserStorage,
+	mainSessionStorage authdomain.SessionStorage,
 	config *config.ServerConfig,
 	tokenGenerator TokenGenerator) *UserAuthService {
 	return &UserAuthService{storage: storage,
@@ -31,31 +31,29 @@ func NewUserAuthService(storage domainAuth.UserDataStorage,
 	}
 }
 
-func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error {
+func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 	var isMatch bool
 
-	if isMatch, _ = uas.usernameRegexp.MatchString(data.Username); !isMatch {
+	if isMatch, _ = uas.usernameRegexp.MatchString(string(data.UserName)); !isMatch {
 		return ErrorPoorUsername
 	}
-	if isMatch, _ = uas.passwordRegexp.MatchString(data.Password); !isMatch {
+	if isMatch, _ = uas.passwordRegexp.MatchString(string(data.Password)); !isMatch {
 		return ErrorPoorPassword
 	}
 
-	userExist, err := uas.storage.IsUserExist(data.Username)
-	if userExist {
+	_, err := uas.storage.GetUserByUsername(data.UserName)
+	if err == nil {
 		return ErrorUserExists
-	}
-	if err != nil {
-		return err
 	}
 
 	data.UUID = utils.GenerateUUID()
 
-	data.Password, err = uas.hasher.HashString(data.Password)
+	passwordHash, err := uas.hasher.HashString(string(data.Password))
 	if err != nil {
 		//log.Println("In app.RegisterNewUser", err)
 		return err
 	}
+	data.Password = authdomain.Password(passwordHash)
 
 	err = uas.storage.AddNewUser(data)
 	if err != nil {
@@ -66,39 +64,40 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserAuthData) error 
 	return nil
 }
 
-func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserAuthData) (token string, err error) {
+func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authdomain.Token, err error) {
 	token = ""
-	var user domainAuth.UserAuthData
+	var user authdomain.UserData
 
-	user, err = uas.storage.GetUserByUsername(data.Username)
+	user, err = uas.storage.GetUserByUsername(data.UserName)
 	if err != nil {
 		return
 	}
 
 	var passwordHash string
-	passwordHash, err = uas.hasher.HashString(data.Password)
+	passwordHash, err = uas.hasher.HashString(string(data.Password))
 	if err != nil {
 		return
 	}
 
-	if passwordHash != user.Password {
+	if passwordHash != string(user.Password) {
 		err = ErrorInvalidPassword
 		return
 	}
 
-	var wasFound bool
-	token, wasFound = uas.mainSessionStorage.GetTokenByUUID(user.UUID)
-	if wasFound {
-		return
+	_, err = uas.mainSessionStorage.GetSessionSByUUID(data.UUID)
+	if err != nil {
+		return "", err
 	}
-	token = uas.tokenGenerator.GenerateToken()
-	uas.mainSessionStorage.AddNewUser(&UserSessionData{Token: token, UserUUID: user.UUID})
+
+	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
+	uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token})
 	return
 }
 
-func (uas *UserAuthService) CheckToken(token string) error {
-	if !uas.mainSessionStorage.IsTokenValid(token) {
-		return ErrorInvalidToken
+func (uas *UserAuthService) CheckToken(token authdomain.Token) error {
+	_, err := uas.mainSessionStorage.GetSessionByToken(token)
+	if err != nil {
+		return err
 	}
 	return nil
 }
