@@ -35,18 +35,18 @@ func main() {
 	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
 	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
-	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
+	//userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
 
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 	lobbyHandler := handlers.NewLobbyHandler(userAuthService)
-	webSocketHandler := handlers.NewWebSocketHandler(userAuthService, userWebSocketManageService)
+	//webSocketHandler := handlers.NewWebSocketHandler(userAuthService, userWebSocketManageService)
 
 	e := echo.New()
 
 	e.POST("/register", userAuthHandler.Register)
 	e.POST("/authorize", userAuthHandler.Authorize)
 	e.GET("/rooms", lobbyHandler.GetRoomsInfo)
-	e.GET("/ws", webSocketHandler.Handle)
+	//e.GET("/ws", webSocketHandler.Handle)
 
 	e.Logger.Fatal(e.Start(serverConfig.Server.Port))
 }

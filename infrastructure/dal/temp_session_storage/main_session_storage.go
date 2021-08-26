@@ -2,19 +2,19 @@ package temp_session_storage
 
 import (
 	"backgammon/app/auth"
-	"github.com/gorilla/websocket"
+	"backgammon/domain/authdomain"
 	"log"
 	"sync"
 	"time"
 )
 
 type MainSessionStorage struct {
-	storage map[string]*auth.SessionData
+	storage map[authdomain.Token]authdomain.SessionData
 	mutex sync.RWMutex
 }
 
 func NewMainSessionStorage() *MainSessionStorage {
-	storage := make(map[string]*auth.UserSessionData)
+	storage := make(map[authdomain.Token]authdomain.SessionData)
 	//storage := restoreFromDatabase()
 
 	mainSessionStorage := &MainSessionStorage{
@@ -24,62 +24,59 @@ func NewMainSessionStorage() *MainSessionStorage {
 	return mainSessionStorage
 }
 
-func (mss *MainSessionStorage) AddNewUser(data *auth.UserSessionData) {
-	data.ExpiryTime = time.Now().UTC().Add(30 * time.Second)
+func (mss *MainSessionStorage) AddSession (data authdomain.SessionData) error {
+	data.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(30 * time.Second))
 
 	mss.mutex.Lock()
 	mss.storage[data.Token] = data
 	mss.mutex.Unlock()
+
+	return nil
 }
 
-func (mss *MainSessionStorage) UpdateTokenExpiryTime(token string) {
-	mss.mutex.RLocker()
-	temp := mss.storage[token]
-	mss.mutex.RUnlock()
-
-	newExpiryTime := time.Now().UTC().Add(30 * time.Second)
-	temp.ExpiryTime = newExpiryTime
+func (mss *MainSessionStorage) UpdateSession(token authdomain.Token, data authdomain.SessionData) error {
+	data.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(30 * time.Second))
 
 	mss.mutex.Lock()
-	mss.storage[token] = temp
+	mss.storage[token] = data
 	mss.mutex.Unlock()
+
+	return nil
 }
 
-func (mss *MainSessionStorage) DeleteUserByToken(token string) {
+func (mss *MainSessionStorage) DeleteSession(token authdomain.Token) error {
 	delete(mss.storage, token)
+
+	return nil
 }
 
-func (mss *MainSessionStorage) GetTokenByUUID(uuid string) (token string, wasFound bool) {
+func (mss *MainSessionStorage) GetSessionSByUUID(uuid authdomain.UUID) (authdomain.SessionData, error) {
 	mss.mutex.RLock()
 	for _, user := range mss.storage {
-		if user.UserUUID == uuid {
-			mss.UpdateTokenExpiryTime(user.Token)
-			return user.Token, true
+		if user.UUID == uuid {
+			user.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(30 * time.Second))
+			return user, nil
 		}
 	}
 	mss.mutex.RUnlock()
 
-	return "", false
+	return authdomain.SessionData{}, auth.ErrorNoActiveSessions
 }
 
-func (mss *MainSessionStorage) IsTokenValid(token string) bool {
+func (mss *MainSessionStorage) GetSessionByToken(token authdomain.Token) (authdomain.SessionData, error) {
 	mss.mutex.RLock()
-	_, ok := mss.storage[token]
+	session, ok := mss.storage[token]
 	mss.mutex.RUnlock()
 
-	return ok
+	if ok {
+		return session, nil
+	}
+	return authdomain.SessionData{}, auth.ErrorInvalidToken
 }
 
-func (mss *MainSessionStorage) SetWebSocketToUserByToken(token string, webSocket *websocket.Conn) {
-	mss.mutex.RLock()
-	mss.storage[token].WebSocket = webSocket
 
-	// for testing
-	log.Println("to user", mss.storage[token].UserUUID, "set websocket", &webSocket)
-	mss.mutex.RUnlock()
-}
 
-func restoreFromDatabase() map[string]*auth.UserSessionData {
+func restoreFromDatabase() map[string]authdomain.SessionData {
 	panic("implement me")
 }
 
@@ -91,9 +88,7 @@ func (mss *MainSessionStorage) overdueTokenCleaner() {
 		log.Println("Token cleaner start")
 		mss.mutex.RLock()
 		for key, _ := range mss.storage {
-			if mss.storage[key].ExpiryTime.Before(time.Now()) {
-				mss.storage[key].WebSocket.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, "you have been inactive for too long"))
-				mss.storage[key].WebSocket.Close()
+			if time.Time(mss.storage[key].ExpiryTime).Before(time.Now()) {
 				mss.mutex.RUnlock()
 				mss.mutex.Lock()
 				delete(mss.storage, mss.storage[key].Token)

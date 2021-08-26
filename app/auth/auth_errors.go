@@ -10,3 +10,5 @@ var ErrorPoorPassword = fmt.Errorf("password don't meet the requirements: it sho
 var ErrorInvalidToken = fmt.Errorf("the token you provide is invalid")
 
 var ErrorNullArgument = fmt.Errorf("null argument exception")
+
+var ErrorNoActiveSessions = fmt.Errorf("user with this uuid has no active sessions")
