@@ -5,6 +5,7 @@ import (
 	"backgammon/domain/authdomain"
 	"backgammon/utils"
 	"github.com/dlclark/regexp2"
+	"time"
 )
 
 type UserAuthService struct {
@@ -13,8 +14,8 @@ type UserAuthService struct {
 	config             *config.ServerConfig
 	hasher             StringHasher
 	tokenGenerator     TokenGenerator
-	usernameRegexp *regexp2.Regexp
-	passwordRegexp *regexp2.Regexp
+	usernameRegexp     *regexp2.Regexp
+	passwordRegexp     *regexp2.Regexp
 }
 
 func NewUserAuthService(storage authdomain.UserStorage,
@@ -26,8 +27,8 @@ func NewUserAuthService(storage authdomain.UserStorage,
 		config:             config,
 		hasher:             NewHasherSHA256(),
 		tokenGenerator:     tokenGenerator,
-		usernameRegexp: regexp2.MustCompile("^(?=.{6,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$", 0),
-		passwordRegexp: regexp2.MustCompile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", 0),
+		usernameRegexp:     regexp2.MustCompile("^(?=.{6,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$", 0),
+		passwordRegexp:     regexp2.MustCompile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$", 0),
 	}
 }
 
@@ -84,11 +85,17 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 		return
 	}
 
-	_, err = uas.mainSessionStorage.GetSessionSByUUID(data.UUID)
-	if err != nil {
-		return "", err
+	session, err := uas.mainSessionStorage.GetSessionSByUUID(user.UUID)
+	if err == ErrorNoActiveSessions {
+		token = authdomain.Token(uas.tokenGenerator.GenerateToken())
+		tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
+		err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
+		return token, err
 	}
 
+	if time.Time(session.ExpiryTime).Before(time.Now().UTC()) {
+
+	}
 	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
 	uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token})
 	return
