@@ -12,6 +12,14 @@ type SessionStorageRAM struct {
 	sync.RWMutex
 }
 
+func NewSessionStorageRam() *SessionStorageRAM {
+	return &SessionStorageRAM{
+		sessions:  make(map[authdomain.Token]*authdomain.SessionData, 0),
+		uuidIndex: make(map[authdomain.UUID]*authdomain.SessionData,0),
+		RWMutex:   sync.RWMutex{},
+	}
+}
+
 func (s SessionStorageRAM) AddSession(data authdomain.SessionData) error {
 	s.Lock()
 	defer s.Unlock()
@@ -62,13 +70,7 @@ func (s SessionStorageRAM) UpdateSession(token authdomain.Token, data authdomain
 	return nil
 }
 
-func NewSessionStorageRam() *SessionStorageRAM {
-	return &SessionStorageRAM{
-		sessions:  make(map[authdomain.Token]*authdomain.SessionData, 0),
-		uuidIndex: make(map[authdomain.UUID]*authdomain.SessionData,0),
-		RWMutex:   sync.RWMutex{},
-	}
-}
+
 
 
 
