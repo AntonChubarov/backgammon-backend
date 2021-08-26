@@ -34,16 +34,16 @@ func (s SessionStorageRAM) AddSession(data authdomain.SessionData) error {
 }
 
 func (s SessionStorageRAM) GetSessionByToken(token authdomain.Token) (authdomain.SessionData, error) {
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 	ses, ok:=s.sessions[token]
 	if !ok {return authdomain.SessionData{}, auth.ErrorInvalidToken}
 	return *ses, nil
 }
 
 func (s SessionStorageRAM) GetSessionSByUUID(uuid authdomain.UUID) (authdomain.SessionData, error) {
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 	ses, ok:=s.uuidIndex[uuid]
 	if !ok { return authdomain.SessionData{}, auth.ErrorNoActiveSessions}
 	return *ses, nil
@@ -61,8 +61,8 @@ func (s SessionStorageRAM) DeleteSession(token authdomain.Token) error {
 }
 
 func (s SessionStorageRAM) UpdateSession(token authdomain.Token, data authdomain.SessionData) error {
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 	ses, ok:=s.sessions[token]
 	if !ok  {return auth.ErrorInvalidToken}
 	ses.ExpiryTime=data.ExpiryTime
