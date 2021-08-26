@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backgammon/app/auth"
+	"backgammon/domain/authdomain"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -17,7 +18,7 @@ func NewLobbyHandler(userAuthService *auth.UserAuthService) *LobbyHandler {
 func (lh *LobbyHandler) GetRoomsInfo(c echo.Context) error {
 	var err error
 
-	token := c.QueryParam("token")
+	token := authdomain.Token(c.QueryParam("token"))
 
 	err = lh.userAuthService.CheckToken(token)
 
