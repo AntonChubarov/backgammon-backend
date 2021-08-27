@@ -5,6 +5,7 @@ import (
 	"backgammon/domain/authdomain"
 	"backgammon/utils"
 	"github.com/dlclark/regexp2"
+	"log"
 	"time"
 )
 
@@ -44,6 +45,7 @@ func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 
 	_, err := uas.storage.GetUserByUsername(data.UserName)
 	if err == nil {
+		log.Println("Register: user", data.UserName, "already exist")
 		return ErrorUserExists
 	}
 
@@ -62,6 +64,7 @@ func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 		return err
 	}
 
+	log.Println("Register: user", data.UserName, "registered")
 	return nil
 }
 
@@ -70,6 +73,7 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 
 	user, err = uas.storage.GetUserByUsername(data.UserName)
 	if err != nil {
+		log.Println("Authorize: user", data.UserName, "not registered")
 		return
 	}
 
@@ -80,6 +84,7 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 	}
 
 	if passwordHash != string(user.Password) {
+		log.Println("Authorize: user", data.UserName, "entered invalid password")
 		err = ErrorInvalidPassword
 		return
 	}
@@ -88,21 +93,23 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 
 	if err == nil {
 		if time.Time(session.ExpiryTime).After(time.Now().UTC()) {
-			session.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
+			session.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(5 * time.Second))
 			uas.mainSessionStorage.UpdateSession(session.Token, session)
+			log.Println("Authorize: user", data.UserName, "has active session, session prolonged")
 			return session.Token, nil
 		}
+		log.Println("Authorize: user", data.UserName, "has expired session, session deleted")
 		err = uas.mainSessionStorage.DeleteSession(session.Token)
 		if err != nil {
 			return "", err
 		}
 
-
 	}
 
 	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
-	tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(1 * time.Minute))
+	tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(5 * time.Second))
 	err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
+	log.Println("Authorize: user", data.UserName, "authorized, session created")
 	return token, err
 }
 
