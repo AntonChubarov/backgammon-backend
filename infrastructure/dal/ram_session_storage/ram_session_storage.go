@@ -20,7 +20,7 @@ func NewSessionStorageRam() *SessionStorageRAM {
 	}
 }
 
-func (s SessionStorageRAM) AddSession(data authdomain.SessionData) error {
+func (s *SessionStorageRAM) AddSession(data authdomain.SessionData) error {
 	s.Lock()
 	defer s.Unlock()
 	_, ok:=s.sessions[data.Token]
@@ -33,7 +33,7 @@ func (s SessionStorageRAM) AddSession(data authdomain.SessionData) error {
 	return nil
 }
 
-func (s SessionStorageRAM) GetSessionByToken(token authdomain.Token) (authdomain.SessionData, error) {
+func (s *SessionStorageRAM) GetSessionByToken(token authdomain.Token) (authdomain.SessionData, error) {
 	s.Lock()
 	defer s.Unlock()
 	ses, ok:=s.sessions[token]
@@ -41,7 +41,7 @@ func (s SessionStorageRAM) GetSessionByToken(token authdomain.Token) (authdomain
 	return *ses, nil
 }
 
-func (s SessionStorageRAM) GetSessionSByUUID(uuid authdomain.UUID) (authdomain.SessionData, error) {
+func (s *SessionStorageRAM) GetSessionSByUUID(uuid authdomain.UUID) (authdomain.SessionData, error) {
 	s.Lock()
 	defer s.Unlock()
 	ses, ok:=s.uuidIndex[uuid]
@@ -50,7 +50,7 @@ func (s SessionStorageRAM) GetSessionSByUUID(uuid authdomain.UUID) (authdomain.S
 
 }
 
-func (s SessionStorageRAM) DeleteSession(token authdomain.Token) error {
+func (s *SessionStorageRAM) DeleteSession(token authdomain.Token) error {
 	s.Lock()
 	defer s.Unlock()
 	ses, ok:=s.sessions[token]
@@ -60,7 +60,7 @@ func (s SessionStorageRAM) DeleteSession(token authdomain.Token) error {
 	return nil
 }
 
-func (s SessionStorageRAM) UpdateSession(token authdomain.Token, data authdomain.SessionData) error {
+func (s *SessionStorageRAM) UpdateSession(token authdomain.Token, data authdomain.SessionData) error {
 	s.Lock()
 	defer s.Unlock()
 	ses, ok:=s.sessions[token]

@@ -185,7 +185,7 @@ func TestSessionStorageRAM_UpdateSession(t *testing.T) {
 
 func TestSessionStorageRAM_MultiRoutine(t *testing.T) {
 	wg:=sync.WaitGroup{}
-	wg.Add(5)
+
 	sl1 := fillSessionSlice(10000)
 	sl2 := fillSessionSlice(10000)
 	sl3 := fillSessionSlice(10000)
@@ -199,6 +199,7 @@ func TestSessionStorageRAM_MultiRoutine(t *testing.T) {
 	}
 
 	storage := NewSessionStorageRam()
+	wg.Add(4)
 	fnAdd(storage, sl1) //to read by Token
 	fnAdd(storage, sl2) //to read by UUID
 	fnAdd(storage, sl3) //To delete
@@ -244,11 +245,11 @@ func TestSessionStorageRAM_MultiRoutine(t *testing.T) {
 	}
 
 	wg.Add(5)
-	 fnRdToken(sl1)
-	 fnRdUuid(sl2)
+	 go fnRdToken(sl1)
+	 go fnRdUuid(sl2)
 	 go fnDel(sl3)
-	 fnUpd(sl4, sl2)
-	 fnAdd(storage, sl5)
+	 go fnUpd(sl4, sl2)
+	 go fnAdd(storage, sl5)
 
 	wg.Wait()
 
