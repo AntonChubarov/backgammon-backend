@@ -55,13 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">backgammon/domain/game/game_rules.go (95.5%)</option>
+				<option value="file0">backgammon/domain/game/game_rules.go (100.0%)</option>
 				
 				<option value="file1">backgammon/domain/game/rules_aux.go (0.0%)</option>
 				
 				<option value="file2">backgammon/domain/game/rules_functions.go (0.0%)</option>
 				
-				<option value="file3">backgammon/domain/game/rules_implementation.go (46.5%)</option>
+				<option value="file3">backgammon/domain/game/rules_implementation.go (69.4%)</option>
 				
 				</select>
 			</div>
@@ -112,9 +112,10 @@ func IsStartOfFence(b board.Board, c board.StickColor, startHole int) bool <span
         } else<span class="cov8" title="1"> {
                 startHole=board.InvertNumeration(startHole)
                 for j:=startHole; j&lt;=startHole+5 &amp;&amp; j&lt;=24; j++</span><span class="cov8" title="1">{
-                        if b.Holes[j].StickColor!=c </span><span class="cov8" title="1">{ return false}</span>
+                        i:=board.InvertNumeration(j)
+                        if b.Holes[i].StickColor!=c </span><span class="cov8" title="1">{ return false}</span>
                 }
-                <span class="cov0" title="0">return true</span>
+                <span class="cov8" title="1">return true</span>
         }
 }
 
@@ -194,14 +195,16 @@ func MoveDistance(c board.StickColor, from int, to int) int <span class="cov0" t
 
 import (
         "backgammon/domain/board"
-        "fmt"
-        "log"
 )
 
 //Rule001
 func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error <span class="cov8" title="1">{
         if g.CurrentTurn != c </span><span class="cov8" title="1">{
                 return ErrorOutOfTurn
+        }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, t)
         }</span>
         <span class="cov8" title="1">return nil</span>
 }
@@ -211,12 +214,20 @@ func (r *RuleCorrectGamePhase) ValidateRule(g *Game, c board.StickColor, t *boar
         if g.State != InProcess </span><span class="cov8" title="1">{
                 return ErrorOutOfGame
         }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, t)
+        }</span>
         <span class="cov8" title="1">return nil</span>
 }
 
 func (r *RuleMatchTurnNumber) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error <span class="cov8" title="1">{
         if g.AwaitingTurnNumber != t.TurnNumber </span><span class="cov8" title="1">{
                 return ErrorInvalidTurnNumber
+        }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, t)
         }</span>
         <span class="cov8" title="1">return nil</span>
 }
@@ -227,6 +238,8 @@ func (r *RuleMoveMatchStickColor) ValidateRule(g *Game, c board.StickColor, m *b
                 return ErrorOpponentsStickMoveAttempt
         }</span>
 
+
+        // Use this code everywhere, or make an iteration over the rules slice
         <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
                 return r.nextRule.ValidateRule(g, c, m, consumedDice)
         }</span>
@@ -234,27 +247,22 @@ func (r *RuleMoveMatchStickColor) ValidateRule(g *Game, c board.StickColor, m *b
 }
 
 //Rule004
-func (r *RuleMoveDirection) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov0" title="0">{
-
-        switch c </span>{
-        case board.White:<span class="cov0" title="0">
-                if board.InvertNumeration(m.From) &gt;= board.InvertNumeration(m.To) </span><span class="cov0" title="0">{
+func (r *RuleMoveDirection) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov8" title="1">{
+        if c == board.White </span><span class="cov8" title="1">{
+                if board.InvertNumeration(m.From) &gt;= board.InvertNumeration(m.To) </span><span class="cov8" title="1">{
                         return ErrorIncorrectMoveDirection
                 }</span>
-        case board.Black:<span class="cov0" title="0">
-                if m.From &gt;= m.To </span><span class="cov0" title="0">{
+        }
+        <span class="cov8" title="1">if c == board.Black </span><span class="cov8" title="1">{
+                if m.From &gt;= m.To </span><span class="cov8" title="1">{
                         return ErrorIncorrectMoveDirection
                 }</span>
-        default:<span class="cov0" title="0">
-                err := fmt.Errorf("unexpected stick color %d in RuleMoveDirection ValidateRule", c)
-                log.Println(err)
-                return err</span>
         }
 
-        <span class="cov0" title="0">if r.nextRule != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
                 return r.nextRule.ValidateRule(g, c, m, consumedDice)
         }</span>
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 //Rule005
@@ -299,41 +307,41 @@ func (r *RuleMoveImpossibleAmountSteps) ValidateRule(g *Game, c board.StickColor
 }
 
 //Rule006
-func (r *RuleMoveToOccupiedHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov0" title="0">{
-        if g.Board.Holes[m.To].StickColor == -c </span><span class="cov0" title="0">{
+func (r *RuleMoveToOccupiedHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov8" title="1">{
+        if g.Board.Holes[m.To].StickColor == -c </span><span class="cov8" title="1">{
                 return ErrorMoveToOccupiedHole
         }</span>
 
-        <span class="cov0" title="0">if r.nextRule != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
                 return r.nextRule.ValidateRule(g, c, m, consumedDice)
         }</span>
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
 //Rule008
-func (r *RuleMoveFromEmptyHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov0" title="0">{
-        if g.Board.Holes[m.From].StickCount == 0 </span><span class="cov0" title="0">{
+func (r *RuleMoveFromEmptyHole) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov8" title="1">{
+        if g.Board.Holes[m.From].StickCount == 0 </span><span class="cov8" title="1">{
                 return ErrorMoveFromEmptyHole
         }</span>
 
-        <span class="cov0" title="0">if r.nextRule != nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
                 return r.nextRule.ValidateRule(g, c, m, consumedDice)
         }</span>
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 
-func (r *RuleForbiddenMoveKindLongBackgammon) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov0" title="0">{
-        if m.MoveKind == board.Movement </span><span class="cov0" title="0">{
+func (r *RuleForbiddenMoveKindLongBackgammon) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error <span class="cov8" title="1">{
+        if m.MoveKind == board.Movement </span><span class="cov8" title="1">{
                 return nil
         }</span>
-        <span class="cov0" title="0">if m.MoveKind == board.Removing </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.MoveKind == board.Removing </span><span class="cov8" title="1">{
                 return nil
         }</span>
-        <span class="cov0" title="0">if m.MoveKind == board.Surrender </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if m.MoveKind == board.Surrender </span><span class="cov8" title="1">{
                 return nil
         }</span>
 
-        <span class="cov0" title="0">if r.nextRule == nil </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if r.nextRule == nil </span><span class="cov8" title="1">{
                 return ErrorImpossibleMoveKind
         }</span>
         <span class="cov0" title="0">return r.nextRule.ValidateRule(g, c, m, consumedDice)</span>
@@ -361,6 +369,9 @@ func (r *RuleMoveFormat) ValidateRule(g *Game, c board.StickColor, m *board.Move
                 }</span>
         }
 
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, m, consumedDice)
+        }</span>
         <span class="cov8" title="1">return nil</span>
 }
 
@@ -370,6 +381,10 @@ func (r *RuleRemovingNotFromHome) ValidateRule(g *Game, c board.StickColor, m *b
         }</span>
         <span class="cov8" title="1">if m.From &lt; 19 </span><span class="cov8" title="1">{
                 return ErrorRemovingFromInvalidHole
+        }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, m, consumedDice)
         }</span>
         <span class="cov8" title="1">return nil</span>
 }
@@ -381,6 +396,10 @@ func (r *RuleTooMuchSteps) ValidateRule(g *Game, c board.StickColor, t *board.Tu
         }</span>
         <span class="cov8" title="1">if len(t.Moves) &gt; expectedStepsNumber </span><span class="cov8" title="1">{
                 return ErrorTooMuchStepsInTurn
+        }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, t)
         }</span>
         <span class="cov8" title="1">return nil</span>
 }
@@ -403,6 +422,10 @@ func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, c board.StickC
         }
         <span class="cov8" title="1">if headCount &gt; 1 </span><span class="cov8" title="1">{
                 return ErrorMoveFromHeadLimit1
+        }</span>
+
+        <span class="cov8" title="1">if r.nextRule != nil </span><span class="cov0" title="0">{
+                return r.nextRule.ValidateRule(g, c, t)
         }</span>
         <span class="cov8" title="1">return nil</span>
 }</pre>

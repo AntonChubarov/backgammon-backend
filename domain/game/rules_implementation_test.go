@@ -3,7 +3,6 @@ package game
 import (
 	"backgammon/domain/board"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"testing"
 )
 
@@ -143,10 +142,10 @@ func TestRuleMatchTurnNumber(t *testing.T) {
 		},
 	}
 
-		rule := RuleMatchTurnNumber{}
+	rule := RuleMatchTurnNumber{}
 
-		for i := range cases {
-			assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color, &cases[i].Turn))
+	for i := range cases {
+		assert.Equal(t, cases[i].ExpectedError, rule.ValidateRule(cases[i].Game, cases[i].Color, &cases[i].Turn))
 	}
 }
 
@@ -210,7 +209,230 @@ func TestRuleMoveMatchStickColor(t *testing.T) {
 
 	rule := RuleMoveMatchStickColor{nextRule: nil}
 	for i := range cases {
-		log.Println("test case: ", i)
+		expected := cases[i].ExpectedError
+		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestRuleMoveDirection(t *testing.T) {
+	cases := []testCase{
+		{
+			Move:          &board.Move{From: 13, To: 15},
+			color:         board.White,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 1, To: 3},
+			color:         board.White,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 16, To: 14},
+			color:         board.White,
+			ExpectedError: ErrorIncorrectMoveDirection,
+		},
+		{
+			Move:          &board.Move{From: 16, To: 16},
+			color:         board.White,
+			ExpectedError: ErrorIncorrectMoveDirection,
+		},
+		{
+			Move:          &board.Move{From: 13, To: 15},
+			color:         board.Black,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 1, To: 3},
+			color:         board.Black,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 16, To: 14},
+			color:         board.Black,
+			ExpectedError: ErrorIncorrectMoveDirection,
+		},
+		{
+			Move:          &board.Move{From: 16, To: 16},
+			color:         board.Black,
+			ExpectedError: ErrorIncorrectMoveDirection,
+		},
+	}
+
+	gameBoard := board.Board{}
+	gameBoard.Clear()
+	gameBoard.Holes[1].StickColor = board.Black
+	gameBoard.Holes[1].StickCount = 15
+	gameBoard.Holes[13].StickColor = board.White
+	gameBoard.Holes[13].StickCount = 15
+
+	g := &Game{Board: gameBoard}
+
+	var consumedDice []int
+
+	rule := RuleMoveDirection{nextRule: nil}
+	for i := range cases {
+		expected := cases[i].ExpectedError
+		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestRuleMoveToOccupiedHole_ValidateRule(t *testing.T) {
+	cases := []testCase{
+		{
+			Move:          &board.Move{From: 23, To: 2},
+			color:         board.White,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 22, To: 3},
+			color:         board.White,
+			ExpectedError: ErrorMoveToOccupiedHole,
+		},
+		{
+			Move:          &board.Move{From: 21, To: 1},
+			color:         board.White,
+			ExpectedError: ErrorMoveToOccupiedHole,
+		},
+		{
+			Move:          &board.Move{From: 12, To: 14},
+			color:         board.Black,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 13, To: 15},
+			color:         board.Black,
+			ExpectedError: ErrorMoveToOccupiedHole,
+		},
+		{
+			Move:          &board.Move{From: 11, To: 13},
+			color:         board.Black,
+			ExpectedError: ErrorMoveToOccupiedHole,
+		},
+	}
+
+	gameBoard := board.Board{}
+	gameBoard.Clear()
+	gameBoard.Holes[1].StickColor = board.Black
+	gameBoard.Holes[1].StickCount = 5
+	for i := 3; i <= 12; i++ {
+		gameBoard.Holes[i].StickColor = board.Black
+		gameBoard.Holes[i].StickCount = 1
+	}
+	gameBoard.Holes[13].StickColor = board.White
+	gameBoard.Holes[13].StickCount = 5
+	for i := 15; i <= 24; i++ {
+		gameBoard.Holes[i].StickColor = board.White
+		gameBoard.Holes[i].StickCount = 1
+	}
+
+	g := &Game{Board: gameBoard}
+
+	var consumedDice []int
+
+	rule := RuleMoveToOccupiedHole{nextRule: nil}
+	for i := range cases {
+		expected := cases[i].ExpectedError
+		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestRuleMoveFromEmptyHole(t *testing.T) {
+	cases := []testCase{
+		{
+			Move:          &board.Move{From: 13, To: 16},
+			color:         board.White,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 14, To: 16},
+			color:         board.White,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 16, To: 18},
+			color:         board.White,
+			ExpectedError: ErrorMoveFromEmptyHole,
+		},
+		{
+			Move:          &board.Move{From: 1, To: 4},
+			color:         board.Black,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 2, To: 4},
+			color:         board.Black,
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{From: 4, To: 6},
+			color:         board.Black,
+			ExpectedError: ErrorMoveFromEmptyHole,
+		},
+	}
+
+	gameBoard := board.Board{}
+	gameBoard.Clear()
+	gameBoard.Holes[1].StickColor = board.Black
+	gameBoard.Holes[1].StickCount = 13
+	for i := 2; i <= 3; i++ {
+		gameBoard.Holes[i].StickColor = board.Black
+		gameBoard.Holes[i].StickCount = 1
+	}
+	gameBoard.Holes[13].StickColor = board.White
+	gameBoard.Holes[13].StickCount = 13
+	for i := 14; i <= 15; i++ {
+		gameBoard.Holes[i].StickColor = board.White
+		gameBoard.Holes[i].StickCount = 1
+	}
+
+	g := &Game{Board: gameBoard}
+
+	var consumedDice []int
+
+	rule := RuleMoveFromEmptyHole{nextRule: nil}
+	for i := range cases {
+		expected := cases[i].ExpectedError
+		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+func TestRuleForbiddenMoveKindLongBackgammon(t *testing.T) {
+	cases := []testCase{
+		{
+			Move:          &board.Move{MoveKind: board.Movement},
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Removing},
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{MoveKind: board.Surrender},
+			ExpectedError: nil,
+		},
+		{
+			Move:          &board.Move{MoveKind: 3},
+			ExpectedError: ErrorImpossibleMoveKind,
+		},
+		{
+			Move:          &board.Move{MoveKind: 998},
+			ExpectedError: ErrorImpossibleMoveKind,
+		},
+	}
+
+	gameBoard := board.Board{}
+	gameBoard.Clear()
+
+	g := &Game{Board: gameBoard}
+
+	var consumedDice []int
+
+	rule := RuleForbiddenMoveKindLongBackgammon{nextRule: nil}
+	for i := range cases {
 		expected := cases[i].ExpectedError
 		actual := rule.ValidateRule(g, cases[i].color, cases[i].Move, consumedDice)
 		assert.Equal(t, expected, actual)
@@ -281,43 +503,43 @@ func TestRuleRemovingNotFromHome(t *testing.T) {
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 24, To: 0},
 			ExpectedError: nil,
-			color: board.Black,
+			color:         board.Black,
 		},
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 19, To: 0},
 			ExpectedError: nil,
-			color: board.Black,
+			color:         board.Black,
 		},
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 18, To: 0},
 			ExpectedError: ErrorRemovingFromInvalidHole,
-			color: board.Black,
+			color:         board.Black,
 		},
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 12, To: 0},
 			ExpectedError: nil,
-			color: board.White,
+			color:         board.White,
 		},
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 7, To: 0},
 			ExpectedError: nil,
-			color: board.White,
+			color:         board.White,
 		},
 		{
 			Move:          &board.Move{MoveKind: board.Removing, From: 6, To: 0},
 			ExpectedError: ErrorRemovingFromInvalidHole,
-			color: board.White,
+			color:         board.White,
 		},
 	}
 
 	gameBoard := board.Board{}
 	gameBoard.Clear()
-	for i := 19; i <=24; i++ {
+	for i := 19; i <= 24; i++ {
 		gameBoard.Holes[i].StickColor = board.Black
 		gameBoard.Holes[i].StickCount = 2
 	}
 
-	for i := 7; i <=12; i++ {
+	for i := 7; i <= 12; i++ {
 		gameBoard.Holes[i].StickColor = board.White
 		gameBoard.Holes[i].StickCount = 2
 	}
@@ -542,114 +764,114 @@ func TestRuleTooMuchSteps_PairDice(t *testing.T) {
 func TestRuleAttemptToGetFewSticksFromHead(t *testing.T) {
 	cases := []turnRuleTestCase{
 		{
-			Color:         board.Black,
-			Turn:          &board.Turn{
+			Color: board.Black,
+			Turn: &board.Turn{
 				StickColor: board.Black,
-				Moves:      []board.Move{
+				Moves: []board.Move{
 					{
 						MoveKind: board.Movement,
-						From: 1,
-						To:   3,
+						From:     1,
+						To:       3,
 					},
 					{
 						MoveKind: board.Movement,
-						From: 3,
-						To:   6,
+						From:     3,
+						To:       6,
 					},
 				},
 			},
 			ExpectedError: nil,
 		},
 		{
-			Color:         board.Black,
-			Turn:          &board.Turn{
+			Color: board.Black,
+			Turn: &board.Turn{
 				StickColor: board.Black,
-				Moves:      []board.Move{
+				Moves: []board.Move{
 					{
 						MoveKind: board.Movement,
-						From: 1,
-						To:   3,
+						From:     1,
+						To:       3,
 					},
 					{
 						MoveKind: board.Movement,
-						From: 1,
-						To:   4,
+						From:     1,
+						To:       4,
 					},
 				},
 			},
 			ExpectedError: ErrorMoveFromHeadLimit1,
 		},
 		{
-			Color:         board.Black,
-			Turn:          &board.Turn{
+			Color: board.Black,
+			Turn: &board.Turn{
 				StickColor: board.Black,
-				Moves:      []board.Move{
+				Moves: []board.Move{
 					{
 						MoveKind: board.Movement,
-						From: 13,
-						To:   15,
+						From:     13,
+						To:       15,
 					},
 					{
 						MoveKind: board.Movement,
-						From: 13,
-						To:   16,
-					},
-				},
-			},
-			ExpectedError: nil,
-		},
-		{
-			Color:         board.White,
-			Turn:          &board.Turn{
-				StickColor: board.White,
-				Moves:      []board.Move{
-					{
-						MoveKind: board.Movement,
-						From: 13,
-						To:   15,
-					},
-					{
-						MoveKind: board.Movement,
-						From: 15,
-						To:   18,
+						From:     13,
+						To:       16,
 					},
 				},
 			},
 			ExpectedError: nil,
 		},
 		{
-			Color:         board.White,
-			Turn:          &board.Turn{
+			Color: board.White,
+			Turn: &board.Turn{
 				StickColor: board.White,
-				Moves:      []board.Move{
+				Moves: []board.Move{
 					{
 						MoveKind: board.Movement,
-						From: 13,
-						To:   15,
+						From:     13,
+						To:       15,
 					},
 					{
 						MoveKind: board.Movement,
-						From: 13,
-						To:   16,
+						From:     15,
+						To:       18,
+					},
+				},
+			},
+			ExpectedError: nil,
+		},
+		{
+			Color: board.White,
+			Turn: &board.Turn{
+				StickColor: board.White,
+				Moves: []board.Move{
+					{
+						MoveKind: board.Movement,
+						From:     13,
+						To:       15,
+					},
+					{
+						MoveKind: board.Movement,
+						From:     13,
+						To:       16,
 					},
 				},
 			},
 			ExpectedError: ErrorMoveFromHeadLimit1,
 		},
 		{
-			Color:         board.White,
-			Turn:          &board.Turn{
+			Color: board.White,
+			Turn: &board.Turn{
 				StickColor: board.White,
-				Moves:      []board.Move{
+				Moves: []board.Move{
 					{
 						MoveKind: board.Movement,
-						From: 1,
-						To:   3,
+						From:     1,
+						To:       3,
 					},
 					{
 						MoveKind: board.Movement,
-						From: 1,
-						To:   4,
+						From:     1,
+						To:       4,
 					},
 				},
 			},

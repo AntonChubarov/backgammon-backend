@@ -2,14 +2,16 @@ package game
 
 import (
 	"backgammon/domain/board"
-	"fmt"
-	"log"
 )
 
 //Rule001
 func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
 	if g.CurrentTurn != c {
 		return ErrorOutOfTurn
+	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, t)
 	}
 	return nil
 }
@@ -19,12 +21,20 @@ func (r *RuleCorrectGamePhase) ValidateRule(g *Game, c board.StickColor, t *boar
 	if g.State != InProcess {
 		return ErrorOutOfGame
 	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, t)
+	}
 	return nil
 }
 
 func (r *RuleMatchTurnNumber) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
 	if g.AwaitingTurnNumber != t.TurnNumber {
 		return ErrorInvalidTurnNumber
+	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, t)
 	}
 	return nil
 }
@@ -35,6 +45,7 @@ func (r *RuleMoveMatchStickColor) ValidateRule(g *Game, c board.StickColor, m *b
 		return ErrorOpponentsStickMoveAttempt
 	}
 
+	// Use this code everywhere, or make an iteration over the rules slice
 	if r.nextRule != nil {
 		return r.nextRule.ValidateRule(g, c, m, consumedDice)
 	}
@@ -43,20 +54,15 @@ func (r *RuleMoveMatchStickColor) ValidateRule(g *Game, c board.StickColor, m *b
 
 //Rule004
 func (r *RuleMoveDirection) ValidateRule(g *Game, c board.StickColor, m *board.Move, consumedDice []int) error {
-
-	switch c {
-	case board.White:
+	if c == board.White {
 		if board.InvertNumeration(m.From) >= board.InvertNumeration(m.To) {
 			return ErrorIncorrectMoveDirection
 		}
-	case board.Black:
+	}
+	if c == board.Black {
 		if m.From >= m.To {
 			return ErrorIncorrectMoveDirection
 		}
-	default:
-		err := fmt.Errorf("unexpected stick color %d in RuleMoveDirection ValidateRule", c)
-		log.Println(err)
-		return err
 	}
 
 	if r.nextRule != nil {
@@ -158,17 +164,20 @@ func (r *RuleMoveFormat) ValidateRule(g *Game, c board.StickColor, m *board.Move
 	}
 
 	if m.MoveKind == board.Movement {
-		if m.From < 1 || m.From > 24 ||	m.To < 1 ||	m.To > 24 {
+		if m.From < 1 || m.From > 24 || m.To < 1 || m.To > 24 {
 			return ErrorIncorrectMoveFormat
 		}
 	}
 
 	if m.MoveKind == board.Removing {
-		if m.From < 1 || m.From > 24 ||	m.To != 0 {
+		if m.From < 1 || m.From > 24 || m.To != 0 {
 			return ErrorIncorrectMoveFormat
 		}
 	}
 
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, m, consumedDice)
+	}
 	return nil
 }
 
@@ -178,6 +187,10 @@ func (r *RuleRemovingNotFromHome) ValidateRule(g *Game, c board.StickColor, m *b
 	}
 	if m.From < 19 {
 		return ErrorRemovingFromInvalidHole
+	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, m, consumedDice)
 	}
 	return nil
 }
@@ -189,6 +202,10 @@ func (r *RuleTooMuchSteps) ValidateRule(g *Game, c board.StickColor, t *board.Tu
 	}
 	if len(t.Moves) > expectedStepsNumber {
 		return ErrorTooMuchStepsInTurn
+	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, t)
 	}
 	return nil
 }
@@ -211,6 +228,10 @@ func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, c board.StickC
 	}
 	if headCount > 1 {
 		return ErrorMoveFromHeadLimit1
+	}
+
+	if r.nextRule != nil {
+		return r.nextRule.ValidateRule(g, c, t)
 	}
 	return nil
 }
