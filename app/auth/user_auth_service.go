@@ -35,12 +35,11 @@ func NewUserAuthService(storage authdomain.UserStorage,
 }
 
 func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
-	var isMatch bool
 
-	if isMatch, _ = uas.usernameRegexp.MatchString(string(data.UserName)); !isMatch {
+	if isMatch, _ := uas.usernameRegexp.MatchString(string(data.UserName)); !isMatch {
 		return ErrorPoorUsername
 	}
-	if isMatch, _ = uas.passwordRegexp.MatchString(string(data.Password)); !isMatch {
+	if isMatch, _ := uas.passwordRegexp.MatchString(string(data.Password)); !isMatch {
 		return ErrorPoorPassword
 	}
 
@@ -70,9 +69,9 @@ func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 }
 
 func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authdomain.Token, err error) {
-	var user authdomain.UserData
 
-	user, err = uas.storage.GetUserByUsername(data.UserName)
+
+	user, err:= uas.storage.GetUserByUsername(data.UserName)
 	if err != nil {
 		log.Println("Authorize: user", data.UserName, "not registered")
 		return
@@ -94,6 +93,7 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 
 	if err == nil {
 		if time.Time(session.ExpiryTime).After(time.Now().UTC()) {
+			//TODO refactor prolong session
 			session.ExpiryTime = authdomain.ExpiryTime(time.Now().UTC().Add(5 * time.Second))
 			uas.mainSessionStorage.UpdateSession(session.Token, session)
 			log.Println("Authorize: user", data.UserName, "has active session, session prolonged")
@@ -108,6 +108,7 @@ func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authd
 	}
 
 	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
+	//TODO refactor prolong session
 	tokenExpiryTime := authdomain.ExpiryTime(time.Now().UTC().Add(5 * time.Second))
 	err = uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token, ExpiryTime: tokenExpiryTime})
 	log.Println("Authorize: user", data.UserName, "authorized, session created")
