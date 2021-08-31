@@ -37,15 +37,5 @@ func randomInt(min, max int) int {
 	n := nBig.Int64()
 	return min + int(n)
 }
-//func (d *dice) RollTheDice() []int {
-//	d1 := randomInt(1, 6)
-//	d2 := randomInt(1, 6)
-//	if d1 == d2 {
-//		return []int{d1, d2, d1, d2}
-//	}
-//	return []int{d1, d2}
-//
-//
-//}
 
 
