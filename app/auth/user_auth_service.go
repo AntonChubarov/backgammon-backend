@@ -24,7 +24,7 @@ func NewUserAuthService(storage authdomain.UserStorage,
 	config *config.ServerConfig,
 	tokenGenerator TokenGenerator) *UserAuthService {
 	return &UserAuthService{
-		storage: storage,
+		storage:            storage,
 		mainSessionStorage: mainSessionStorage,
 		config:             config,
 		hasher:             NewHasherSHA256(),
