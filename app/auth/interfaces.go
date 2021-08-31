@@ -1,5 +1,7 @@
 package auth
 
+import "backgammon/domain/authdomain"
+
 //type SessionStorage interface {
 //	AddNewUser(data *SessionData)
 //	UpdateTokenExpiryTime(token string)
@@ -17,6 +19,6 @@ type StringHasher interface {
 }
 
 type TokenGenerator interface {
-	GenerateToken () string
+	GenerateToken () authdomain.Token
 }
 

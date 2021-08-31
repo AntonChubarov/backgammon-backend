@@ -1,7 +1,18 @@
 
 package utils
 
+import "backgammon/domain/authdomain"
+
 func Contains(s *[]string, e string) bool {
+	for i := range *s {
+		if (*s)[i] == e {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainsToken(s *[]authdomain.Token, e authdomain.Token) bool {
 	for i := range *s {
 		if (*s)[i] == e {
 			return true

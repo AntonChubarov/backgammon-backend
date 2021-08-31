@@ -2,6 +2,7 @@ package auth
 
 import (
 	"backgammon/config"
+	"backgammon/domain/authdomain"
 	"backgammon/utils"
 
 )
@@ -15,7 +16,7 @@ func NewTokenGeneratorFlex(c *config.ServerConfig ) TokenGenerator {
 	return &TokenGeneratorFlex{TokenLength: c.Token.TokenLength, AllowedSymbols: c.Token.TokenSymbols}
 }
 
-func (tgf *TokenGeneratorFlex) GenerateToken() (token string) {
+func (tgf *TokenGeneratorFlex) generateRandomString() (token string) {
 	token = ""
 	var i int
 	for len(token) < tgf.TokenLength {
@@ -23,5 +24,9 @@ func (tgf *TokenGeneratorFlex) GenerateToken() (token string) {
 		token += string(tgf.AllowedSymbols[i])
 	}
 	return
+}
+
+func (tgf *TokenGeneratorFlex) GenerateToken() authdomain.Token {
+	return authdomain.Token(tgf.generateRandomString())
 }
 
