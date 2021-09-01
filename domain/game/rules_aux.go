@@ -1,14 +1,14 @@
 package game
 
-func (r *RuleMatchOrder) SetNextRule(gr GameRule) {
+func (r *RuleMatchOrder) SetNextRule(gr TurnRule) {
 	r.nextRule = gr
 }
 
-func (r *RuleCorrectGamePhase) SetNextRule(gr GameRule) {
+func (r *RuleCorrectGamePhase) SetNextRule(gr TurnRule) {
 	r.nextRule = gr
 }
 
-func (r *RuleMatchTurnNumber) SetNextRule(gr GameRule) {
+func (r *RuleMatchTurnNumber) SetNextRule(gr TurnRule) {
 	r.nextRule = gr
 }
 

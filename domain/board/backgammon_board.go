@@ -33,6 +33,7 @@ type Move struct {
 	MoveKind
 	From int
 	To int
+	Reserved int
 }
 
 type Board struct {

@@ -1,15 +1,15 @@
 package game
 
 type RuleMatchOrder struct {
-	nextRule GameRule
+	nextRule TurnRule
 }
 
 type RuleCorrectGamePhase struct {
-	nextRule GameRule
+	nextRule TurnRule
 }
 
 type RuleMatchTurnNumber struct {
-	nextRule GameRule
+	nextRule TurnRule
 }
 
 type RuleMoveMatchStickColor struct {
