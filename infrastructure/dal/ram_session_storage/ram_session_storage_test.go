@@ -6,7 +6,9 @@ import (
 	"backgammon/domain/authdomain"
 	"backgammon/utils"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"sync"
+	"sync/atomic"
 	"testing"
 )
 
@@ -254,6 +256,95 @@ func TestSessionStorageRAM_MultiRoutine(t *testing.T) {
 	wg.Wait()
 
 	assert.True(t, true)
+
+
+}
+
+func TestSessionStorageRAM_MultiRoutine_Interleave(t *testing.T) {
+	wg:=sync.WaitGroup{}
+	var readsCounter int64
+	maxInterval:=100
+	sl1 := fillSessionSlice(10000)
+	sl2 := fillSessionSlice(10000)
+	sl3 := fillSessionSlice(10000)
+	sl4 := fillSessionSlice(10000)
+	sl5 := fillSessionSlice(10000)
+	fnAdd:=func(s authdomain.SessionStorage, sl []authdomain.SessionData) {
+		for i:=range sl {
+			s.AddSession(sl[i])
+			tmp:=atomic.LoadInt64(&readsCounter)
+			atomic.StoreInt64(&readsCounter,0)
+			assert.Less(t,tmp, int64(maxInterval))
+		}
+		wg.Done()
+	}
+
+	storage := NewSessionStorageRam()
+	wg.Add(4)
+	fnAdd(storage, sl1) //to read by Token
+	fnAdd(storage, sl2) //to read by UUID
+	fnAdd(storage, sl3) //To delete
+	fnAdd(storage, sl4) //to update from read by Token
+	//-----
+
+	fnUpd:= func(slOrg []authdomain.SessionData, slUpd []authdomain.SessionData) {
+		for i:= range slOrg {
+			err:=storage.UpdateSession(sl4[i].Token, sl2[i])
+			tmp:=atomic.LoadInt64(&readsCounter)
+			atomic.StoreInt64(&readsCounter,0)
+			assert.Less(t,tmp, int64(maxInterval))
+			assert.Nil(t, err)
+			ses, err2:=storage.GetSessionByToken(slOrg[i].Token)
+			assert.Nil(t, err2)
+			assert.Equal(t, slOrg[i].Token, ses.Token)
+			assert.Equal(t, slUpd[i].RoomID, ses.RoomID)
+			assert.Equal(t, slUpd[i].ExpiryTime, ses.ExpiryTime)
+		}
+		wg.Done()
+	}
+
+	fnDel:=func (sl []authdomain.SessionData) {
+		for i:=range sl{
+			err:=storage.DeleteSession(sl[i].Token)
+			tmp:=atomic.LoadInt64(&readsCounter)
+			atomic.StoreInt64(&readsCounter,0)
+			assert.Less(t,tmp, int64(maxInterval))
+			assert.Nil(t, err)
+		}
+		wg.Done()
+	}
+
+	fnRdToken:=func (sl []authdomain.SessionData) {
+		for i:=range sl{
+			atomic.AddInt64(&readsCounter, 1 )
+			ses, err:=storage.GetSessionByToken(sl[i].Token)
+			assert.Nil(t, err)
+			assert.Equal(t, sl[i], ses)
+		}
+		wg.Done()
+	}
+
+	fnRdUuid:=func (sl []authdomain.SessionData) {
+		for i:=range sl{
+			ses, err:=storage.GetSessionSByUUID(sl[i].UUID)
+			atomic.AddInt64(&readsCounter, 1 )
+			assert.Nil(t, err)
+			assert.Equal(t, sl[i], ses)
+		}
+		wg.Done()
+	}
+
+	wg.Add(5)
+	go fnRdToken(sl1)
+	go fnRdUuid(sl2)
+	go fnDel(sl3)
+	go fnUpd(sl4, sl2)
+	go fnAdd(storage, sl5)
+
+	wg.Wait()
+
+	assert.True(t, true)
+	log.Println(readsCounter)
 
 
 }

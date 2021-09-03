@@ -7,7 +7,9 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func TestUserStorageRAM_AddNewUser_single(t *testing.T) {
@@ -170,7 +172,9 @@ func TestUserStorageRAM_ConcurrentRandomAccess (t *testing.T) {
 }
 
 func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
-	count:=1000
+	count:=10000
+	var readsCounter int64
+	maxInterval:=50000
 	storage:= NewUserStorageRAM()
 	sl1:=makeUserArray(count)
 	sl2:=makeUserArray(count)
@@ -193,23 +197,23 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 	go rt(sl3)
 	go rt(sl4)
 
-
-
 	wg.Wait()
 
-	rName:= func (sl []authdomain.UserData){
+	rUuid := func (sl []authdomain.UserData){
 		defer wg.Done()
 		for i:=range sl {
 			user, err:= storage.GetUserByUUID(sl[i].UUID)
+			atomic.AddInt64(&readsCounter, 1 )
 			assert.Nil(t, err)
 			assert.Equal (t, sl[i],  user )
 		}
 	}
 
-	rUuid:=func (sl []authdomain.UserData){
+	rName :=func (sl []authdomain.UserData){
 		defer wg.Done()
 		for i:=range sl {
 			user, err:= storage.GetUserByUsername(sl[i].UserName)
+			atomic.AddInt64(&readsCounter, 1 )
 			assert.Nil(t, err)
 			assert.Equal (t, sl[i],  user )
 		}
@@ -218,6 +222,9 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 	rDel:=func (sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
+			tmp:=atomic.LoadInt64(&readsCounter)
+			atomic.StoreInt64(&readsCounter,0)
+			assert.Less(t,tmp, int64(maxInterval))
 			err := storage.RemoveUser(sl[i].UUID)
 			assert.Nil(t, err)
 		}
@@ -226,6 +233,9 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 	rUpd:=func (slOrg []authdomain.UserData, slUpd []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range slOrg {
+			tmp:=atomic.LoadInt64(&readsCounter)
+			atomic.StoreInt64(&readsCounter,0)
+			assert.Less(t,tmp, int64(maxInterval))
 			storage.UpdateUser(slOrg[i].UUID, &slUpd[i])
 			expected:=slUpd[i].UserName
 			u, err:=storage.GetUserByUUID(slOrg[i].UUID)
@@ -235,11 +245,25 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 		}
 	}
 	wg.Add(5)
-	go rName(sl1)
-	go rUuid(sl2)
+	go rUuid(sl1)
+	go rName(sl2)
 	go rDel(sl3)
 	go rUpd(sl4,sl5)
 	go rt(sl6)
+
+
+	for i:=1; i<=100; i++ {
+		time.Sleep(500*time.Microsecond)
+		wg.Add(1)
+		go rName(sl1)
+
+		wg.Add(1)
+		go rUuid(sl1)
+	}
+
+
+
+
 	wg.Wait()
 	assert.True(t, true)
 }
