@@ -170,7 +170,7 @@ func TestUserStorageRAM_ConcurrentRandomAccess (t *testing.T) {
 }
 
 func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
-	count:=1
+	count:=1000
 	storage:= NewUserStorageRAM()
 	sl1:=makeUserArray(count)
 	sl2:=makeUserArray(count)

@@ -12,8 +12,8 @@ type UserStorageRAM struct {
 }
 
 func (u *UserStorageRAM) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
-	u.RLock()
-	defer u.RUnlock()
+	u.Lock()
+	defer u.Unlock()
 	_, ok:= u.storage[uuid]
 	if !ok {return auth.ErrorUserNotRegistered}
 	u.storage[uuid]=authdomain.UserData{
