@@ -1,10 +1,12 @@
 package main
 
 import (
-	auth2 "backgammon/app/auth"
+	"backgammon/app/auth"
 	"backgammon/config"
-	"backgammon/infrastructure/dal/auth"
 	"backgammon/infrastructure/dal/migrations"
+	"backgammon/infrastructure/dal/ram_user_storage"
+	"backgammon/infrastructure/dal/temp_session_storage"
+	"backgammon/infrastructure/dal/user_storage_pgsql"
 	"backgammon/infrastructure/handlers"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
@@ -15,7 +17,7 @@ import (
 func main() {
 	serverConfig := config.NewServerConfig()
 
-	database := auth.NewDatabaseConnector(serverConfig)
+	database := user_storage_pgsql.NewUserDataStoragePGSQL(serverConfig)
 	defer database.CloseDatabaseConnection()
 
 	s:=bindata.Resource(migrations.AssetNames(), migrations.Asset)
@@ -26,13 +28,14 @@ func main() {
 		serverConfig.Database.Port,
 		serverConfig.Database.Name), s)
 
-	userStorage := auth.NewDatabaseConnector(serverConfig)
-	mainSessionStorage := auth.NewMainSessionStorage()
+	//userStorage := user_storage_pgsql.NewUserDataStoragePGSQL(serverConfig)
+	userStorage := ram_user_storage.NewUserStorageRAM()
+	mainSessionStorage := temp_session_storage.NewMainSessionStorage()
 
-	tokenGenerator := auth2.NewTokenGeneratorFlex(serverConfig)
+	tokenGenerator := auth.NewTokenGeneratorFlex(serverConfig)
 
-	userAuthService := auth2.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
-	userWebSocketManageService := auth2.NewWebSocketManageService(mainSessionStorage)
+	userAuthService := auth.NewUserAuthService(userStorage, mainSessionStorage, serverConfig, tokenGenerator)
+	userWebSocketManageService := auth.NewWebSocketManageService(mainSessionStorage)
 
 	userAuthHandler := handlers.NewUserAuthHandler(userAuthService)
 	lobbyHandler := handlers.NewLobbyHandler(userAuthService)

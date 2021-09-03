@@ -7,6 +7,7 @@ require (
 	github.com/dlclark/regexp2 v1.4.0
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.14.1
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jmoiron/sqlx v1.2.0
@@ -19,6 +20,7 @@ require (
 	github.com/stretchr/testify v1.5.1
 	github.com/tkanos/gonfig v0.0.0-20210106201359-53e13348de2f
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
+	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

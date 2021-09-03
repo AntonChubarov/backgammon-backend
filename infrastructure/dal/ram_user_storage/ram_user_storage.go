@@ -7,30 +7,34 @@ import (
 )
 
 type UserStorageRAM struct {
-	storage map[authdomain.UUID]*authdomain.UserData
+	storage map[authdomain.UUID]authdomain.UserData
 	sync.RWMutex
 }
 
 func (u *UserStorageRAM) UpdateUser(uuid authdomain.UUID, data *authdomain.UserData) error {
-	u.RLock()
-	defer u.RUnlock()
-	user, ok:= u.storage[uuid]
+	u.Lock()
+	defer u.Unlock()
+	_, ok:= u.storage[uuid]
 	if !ok {return auth.ErrorUserNotRegistered}
-	user.Update(data)
+	u.storage[uuid]=authdomain.UserData{
+		UUID:     uuid,
+		UserName: data.UserName,
+		Password: data.Password,
+	}
 	return nil
 }
 
 func NewUserStorageRAM() *UserStorageRAM {
 	return &UserStorageRAM{
-		storage: make(map[authdomain.UUID]*authdomain.UserData,0),
+		storage: make(map[authdomain.UUID]authdomain.UserData,0),
 	}
 }
 
-func (u *UserStorageRAM) AddNewUser(data *authdomain.UserData) error {
+func (u *UserStorageRAM) AddNewUser(data authdomain.UserData) error {
 
 
-	if data==nil {return auth.ErrorNullArgument}
-	if u.checkUser(data) {return auth.ErrorUserExists}
+
+	if u.checkUser(&data) {return auth.ErrorUserExists}
 
 	u.Lock()
 	defer u.Unlock()
@@ -40,16 +44,16 @@ func (u *UserStorageRAM) AddNewUser(data *authdomain.UserData) error {
 func (u *UserStorageRAM) checkUser (data *authdomain.UserData) bool {
 	//u.RLock()
 	//defer u.RUnlock()
-	if user, _:=u.GetUserByUUID(data.UUID); user!=nil {
+	if _, err:=u.GetUserByUUID(data.UUID); err==nil {
 		return true
 	}
-	if user, _:=u.GetUserByUsername(data.UserName); user!=nil {
+	if _, err:=u.GetUserByUsername(data.UserName); err==nil {
 		return true
 	}
 	return false
 }
 
-func (u *UserStorageRAM) GetUserByUsername(name authdomain.UserName) (*authdomain.UserData, error) {
+func (u *UserStorageRAM) GetUserByUsername(name authdomain.UserName) (authdomain.UserData, error) {
 	u.RLock()
 	defer u.RUnlock()
 	for _ , v :=range u.storage {
@@ -57,16 +61,16 @@ func (u *UserStorageRAM) GetUserByUsername(name authdomain.UserName) (*authdomai
 			return v, nil
 		}
 	}
-	return nil, auth.ErrorUserNotRegistered
+	return authdomain.UserData{}, auth.ErrorUserNotRegistered
 }
 
-func (u *UserStorageRAM) GetUserByUUID(uuid authdomain.UUID) (*authdomain.UserData, error) {
+func (u *UserStorageRAM) GetUserByUUID(uuid authdomain.UUID) (authdomain.UserData, error) {
 	u.RLock()
 	v, ok :=u.storage[uuid]
 	u.RUnlock()
 
 	if !ok {
-		return nil, auth.ErrorUserNotRegistered
+		return authdomain.UserData{}, auth.ErrorUserNotRegistered
 	}
 	return v, nil
 }

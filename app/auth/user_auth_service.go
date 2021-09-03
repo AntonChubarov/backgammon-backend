@@ -2,14 +2,14 @@ package auth
 
 import (
 	"backgammon/config"
-	domainAuth "backgammon/domain/authdomain"
+	"backgammon/domain/authdomain"
 	"backgammon/utils"
 	"github.com/dlclark/regexp2"
 )
 
 type UserAuthService struct {
-	storage            domainAuth.UserStorage
-	mainSessionStorage SessionStorage
+	storage            authdomain.UserStorage
+	mainSessionStorage authdomain.SessionStorage
 	config             *config.ServerConfig
 	hasher             StringHasher
 	tokenGenerator     TokenGenerator
@@ -17,8 +17,8 @@ type UserAuthService struct {
 	passwordRegexp *regexp2.Regexp
 }
 
-func NewUserAuthService(storage domainAuth.UserStorage,
-	mainSessionStorage SessionStorage,
+func NewUserAuthService(storage authdomain.UserStorage,
+	mainSessionStorage authdomain.SessionStorage,
 	config *config.ServerConfig,
 	tokenGenerator TokenGenerator) *UserAuthService {
 	return &UserAuthService{storage: storage,
@@ -31,7 +31,7 @@ func NewUserAuthService(storage domainAuth.UserStorage,
 	}
 }
 
-func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserData) error {
+func (uas *UserAuthService) RegisterNewUser(data authdomain.UserData) error {
 	var isMatch bool
 
 	if isMatch, _ = uas.usernameRegexp.MatchString(string(data.UserName)); !isMatch {
@@ -53,9 +53,9 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserData) error {
 		//log.Println("In app.RegisterNewUser", err)
 		return err
 	}
-	data.Password = domainAuth.Password(passwordHash)
+	data.Password = authdomain.Password(passwordHash)
 
-	err = uas.storage.AddNewUser(&data)
+	err = uas.storage.AddNewUser(data)
 	if err != nil {
 		//log.Println("In app.RegisterNewUser", err)
 		return err
@@ -64,9 +64,9 @@ func (uas *UserAuthService) RegisterNewUser(data domainAuth.UserData) error {
 	return nil
 }
 
-func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserData) (token string, err error) {
+func (uas *UserAuthService) AuthorizeUser(data authdomain.UserData) (token authdomain.Token, err error) {
 	token = ""
-	var user *domainAuth.UserData
+	var user authdomain.UserData
 
 	user, err = uas.storage.GetUserByUsername(data.UserName)
 	if err != nil {
@@ -84,19 +84,20 @@ func (uas *UserAuthService) AuthorizeUser(data domainAuth.UserData) (token strin
 		return
 	}
 
-	var wasFound bool
-	token, wasFound = uas.mainSessionStorage.GetTokenByUUID(string(user.UUID))
-	if wasFound {
-		return
+	_, err = uas.mainSessionStorage.GetSessionSByUUID(data.UUID)
+	if err != nil {
+		return "", err
 	}
-	token = uas.tokenGenerator.GenerateToken()
-	uas.mainSessionStorage.AddNewUser(&UserSessionData{Token: token, UserUUID: string(user.UUID)})
+
+	token = authdomain.Token(uas.tokenGenerator.GenerateToken())
+	uas.mainSessionStorage.AddSession(authdomain.SessionData{UUID: user.UUID, Token: token})
 	return
 }
 
-func (uas *UserAuthService) CheckToken(token string) error {
-	if !uas.mainSessionStorage.IsTokenValid(token) {
-		return ErrorInvalidToken
+func (uas *UserAuthService) CheckToken(token authdomain.Token) error {
+	_, err := uas.mainSessionStorage.GetSessionByToken(token)
+	if err != nil {
+		return err
 	}
 	return nil
 }

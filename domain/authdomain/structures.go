@@ -16,12 +16,9 @@ type UserData struct {
 	Password
 }
 
-func (u *UserData) Update(sample *UserData) {
-	u.UserName=sample.UserName
-	u.Password=sample.Password
-}
 
-type UserSessionData struct {
+
+type SessionData struct {
 	UUID
 	Token
 	RoomID

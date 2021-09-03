@@ -19,13 +19,13 @@ func TestUserStorageRAM_AddNewUser_single(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 	}
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err:= storage.GetUserByUUID(userData.UUID)
 	assert.Equal(t, nil, err)
 	assert.NotNil(t, readUser)
-	assert.Equal(t, userData, *readUser)
+	assert.Equal(t, userData, readUser)
 }
 
 func TestUserStorageRAM_AddNewUser_duplicate(t *testing.T) {
@@ -38,8 +38,8 @@ func TestUserStorageRAM_AddNewUser_duplicate(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 	}
-	err:=storage.AddNewUser(&userData)
-	err=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
+	err=storage.AddNewUser(userData)
 	assert.Equal(t, auth.ErrorUserExists, err)
 }
 
@@ -54,7 +54,7 @@ func TestUserStorageRAM_AddNewUser_NonConcurrent(t *testing.T) {
 			UserName: authdomain.UserName(gofakeit.Password(true, true, true, false, false, 32)),
 			Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 		}
-		err:=storage.AddNewUser(&userData)
+		err:=storage.AddNewUser(userData)
 		assert.Equal(t, nil, err)
 	}
 
@@ -72,7 +72,7 @@ func TestUserStorageRAM_AddNewUser_Concurrent(t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			assert.Nil(t, storage.AddNewUser(&sl[i]))
+			assert.Nil(t, storage.AddNewUser(sl[i]))
 		}
 	}
 	go rt(sl1)
@@ -91,13 +91,13 @@ func TestUserStorageRAM_AddNewUser_Concurrent_verify(t *testing.T) {
 	sl3:=makeUserArray(count)
 	sl4:=makeUserArray(count)
 	storage:= NewUserStorageRAM()
-	var wg sync.WaitGroup
+	wg:=sync.WaitGroup{}
 	wg.Add(4)
 
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
@@ -117,7 +117,7 @@ func TestUserStorageRAM_AddNewUser_Concurrent_verify(t *testing.T) {
 	for i:=range sl {
 		user, err:= storage.GetUserByUUID(sl[i].UUID)
 		assert.Nil(t, err)
-		assert.Equal (t, sl[i],  *user )
+		assert.Equal (t, sl[i],  user )
 	}
 }
 
@@ -132,7 +132,7 @@ func TestUserStorageRAM_ConcurrentRandomAccess (t *testing.T) {
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
@@ -145,7 +145,7 @@ func TestUserStorageRAM_ConcurrentRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUUID(sl[i].UUID)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -154,7 +154,7 @@ func TestUserStorageRAM_ConcurrentRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUsername(sl[i].UserName)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 	wg.Add(3)
@@ -177,19 +177,22 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 	sl3:=makeUserArray(count)
 	sl4:=makeUserArray(count)
 	sl5:=makeUserArray(count)
+	sl6:=makeUserArray(count)
 
 	wg:=sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(4)
 	rt:= func(sl []authdomain.UserData) {
 		defer wg.Done()
 		for i:=range sl {
-			err:=storage.AddNewUser(&sl[i])
+			err:=storage.AddNewUser(sl[i])
 			assert.Nil(t, err)
 		}
 	}
 	go rt(sl1)
 	go rt(sl2)
 	go rt(sl3)
+	go rt(sl4)
+
 
 
 	wg.Wait()
@@ -199,7 +202,7 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUUID(sl[i].UUID)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -208,7 +211,7 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 		for i:=range sl {
 			user, err:= storage.GetUserByUsername(sl[i].UserName)
 			assert.Nil(t, err)
-			assert.Equal (t, sl[i],  *user )
+			assert.Equal (t, sl[i],  user )
 		}
 	}
 
@@ -229,15 +232,14 @@ func TestUserStorageRAM_FullRandomAccess (t *testing.T) {
 			assert.Nil(t, err)
 			actual:=u.UserName
 			assert.Equal(t, expected, actual)
-
 		}
 	}
 	wg.Add(5)
 	go rName(sl1)
 	go rUuid(sl2)
 	go rDel(sl3)
-	go rUpd(sl1,sl4)
-	go rt(sl5)
+	go rUpd(sl4,sl5)
+	go rt(sl6)
 	wg.Wait()
 	assert.True(t, true)
 }
@@ -252,13 +254,12 @@ func TestUserStorageRAM_GetUserByUUID_single(t *testing.T) {
 		UserName: authdomain.UserName(gofakeit.Username()),
 		Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 	}
-	err:=storage.AddNewUser(&userData)
+	err:=storage.AddNewUser(userData)
 	assert.Equal(t, nil, err)
 
 	readUser, err2:=storage.GetUserByUUID(userData.UUID)
 	assert.Nil(t, err2)
-	assert.Equal(t, userData, *readUser)
-
+	assert.Equal(t, userData, readUser)
 }
 
 func makeUserArray(count int) []authdomain.UserData {
@@ -269,7 +270,6 @@ func makeUserArray(count int) []authdomain.UserData {
 			UserName: authdomain.UserName(gofakeit.Password(true, true, true, false, false, 32)),
 			Password: authdomain.Password(gofakeit.Password(true, true, true, false, false, 10)),
 		}
-
 		sl=append(sl, userData)
 	}
 	return sl

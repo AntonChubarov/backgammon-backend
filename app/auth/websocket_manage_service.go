@@ -1,15 +1,17 @@
 package auth
 
-import "github.com/gorilla/websocket"
+import (
+	"backgammon/domain/authdomain"
+)
 
 type WebSocketManageService struct {
-	mainSessionStorage SessionStorage
+	mainSessionStorage authdomain.SessionStorage
 }
 
-func NewWebSocketManageService(mainSessionStorage SessionStorage) *WebSocketManageService {
+func NewWebSocketManageService(mainSessionStorage authdomain.SessionStorage) *WebSocketManageService {
 	return &WebSocketManageService{mainSessionStorage: mainSessionStorage}
 }
 
-func (wsms *WebSocketManageService) SetWebSocketByToken(token string, webSocket *websocket.Conn)  {
-	wsms.mainSessionStorage.SetWebSocketToUserByToken(token, webSocket)
-}
+//func (wsms *WebSocketManageService) SetWebSocketByToken(token string, webSocket *websocket.Conn)  {
+//	wsms.mainSessionStorage.SetWebSocketToUserByToken(token, webSocket)
+//}
