@@ -4,7 +4,6 @@ import (
 	"backgammon/app/auth"
 	"backgammon/domain/authdomain"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -16,7 +15,6 @@ func NewUserAuthHandler(service *auth.UserAuthService) *UserAuthHandler {
 	return &UserAuthHandler{userAuthService: service}
 }
 
-
 func (uah *UserAuthHandler) Register(c echo.Context) error {
 	var err error
 	var request UserAuthRequestDTO
@@ -27,7 +25,7 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	log.Println("register request from:", request.Username)
+	//log.Println("register request from:", request.Username)
 
 	user := ConvertUserRegDataToUser(request)
 	err = uah.userAuthService.RegisterNewUser(user)
@@ -45,7 +43,6 @@ func (uah *UserAuthHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserRegistrationResponseDTO{Message: "Successfully registered"})
 }
 
-
 func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	var err error
 	var request UserAuthRequestDTO
@@ -56,7 +53,7 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	log.Println("authorize request from:", request.Username)
+	//log.Println("authorize request from:", request.Username)
 
 	user := ConvertUserRegDataToUser(request)
 
@@ -75,22 +72,19 @@ func (uah *UserAuthHandler) Authorize(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserAuthorizationResponseDTO{Message: "Authorized", Token: string(token)})
 }
 
-
 func (uah *UserAuthHandler) ProlongToken(c echo.Context) error {
 
 	panic("Implement me")
 }
-
 
 func (uah *UserAuthHandler) Logout(c echo.Context) error {
 
 	panic("Implement me")
 }
 
-
 func ConvertUserRegDataToUser(user UserAuthRequestDTO) authdomain.UserData {
 	return authdomain.UserData{
-		UUID: "",
+		UUID:     "",
 		UserName: authdomain.UserName(user.Username),
 		Password: authdomain.Password(user.Password),
 	}
