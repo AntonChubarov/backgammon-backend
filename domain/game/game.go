@@ -34,7 +34,7 @@ type Game struct {
 
 type RulesKeeper interface {
 	InitGame(game *Game)
-	PerformTurn(game *Game, stickColor *board.StickColor, turn *board.Turn) error
+	PerformTurn(game *Game, turn *board.Turn) error
 	GetDiceInterpretation() func(d *board.DiceState) []int
 	ElectFirstMove() board.StickColor
 }
