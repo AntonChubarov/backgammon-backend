@@ -19,6 +19,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/tkanos/gonfig v0.0.0-20210106201359-53e13348de2f
+	github.com/viney-shih/go-lock v1.1.1 // indirect
 	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
