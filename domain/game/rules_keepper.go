@@ -3,7 +3,7 @@ package game
 import "backgammon/domain/board"
 
 type LongBackgammonRulesKeepper struct {
-	..initialGameRule   GameRule
+	initialGameRule   TurnRule
 	initialMovingRule MovingRule
 	initialTurnRule   TurnRule
 }
@@ -19,7 +19,7 @@ func NewLongBackgammonRulesKeepper() *LongBackgammonRulesKeepper {
 }
 
 func (lbrk *LongBackgammonRulesKeepper) ValidateAllRules(g *Game, c board.StickColor, t *board.Turn, consumedDice []int) (err error) {
-	err = lbrk.initialGameRule.ValidateRule(g, c, t)
+	err = lbrk.initialGameRule.ValidateRule(g, t)
 	if err != nil {
 		return
 	}

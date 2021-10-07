@@ -36,6 +36,9 @@ type RuleMoveDirection struct {
 	nextRule MovingRule
 }
 
+func (r *RuleMoveDirection) SetNextRule(mr MovingRule) {
+	r.nextRule = mr
+}
 
 type RuleMoveImpossibleAmountSteps struct {
 	nextRule MovingRule

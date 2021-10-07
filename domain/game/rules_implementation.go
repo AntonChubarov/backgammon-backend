@@ -5,36 +5,36 @@ import (
 )
 
 //Rule001
-func (r *RuleMatchOrder) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
-	if g.CurrentTurn != c {
+func (r *RuleMatchOrder) ValidateRule(g *Game, t *board.Turn) error {
+	if g.CurrentTurn != t.StickColor {
 		return ErrorOutOfTurn
 	}
 
 	if r.nextRule != nil {
-		return r.nextRule.ValidateRule(g, c, t)
+		return r.nextRule.ValidateRule(g, t)
 	}
 	return nil
 }
 
 //Rule002
-func (r *RuleCorrectGamePhase) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+func (r *RuleCorrectGamePhase) ValidateRule(g *Game, t *board.Turn) error {
 	if g.State != InProcess {
 		return ErrorOutOfGame
 	}
 
 	if r.nextRule != nil {
-		return r.nextRule.ValidateRule(g, c, t)
+		return r.nextRule.ValidateRule(g, t)
 	}
 	return nil
 }
 
-func (r *RuleMatchTurnNumber) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+func (r *RuleMatchTurnNumber) ValidateRule(g *Game, t *board.Turn) error {
 	if g.AwaitingTurnNumber != t.TurnNumber {
 		return ErrorInvalidTurnNumber
 	}
 
 	if r.nextRule != nil {
-		return r.nextRule.ValidateRule(g, c, t)
+		return r.nextRule.ValidateRule(g, t)
 	}
 	return nil
 }
@@ -195,7 +195,7 @@ func (r *RuleRemovingNotFromHome) ValidateRule(g *Game, c board.StickColor, m *b
 	return nil
 }
 
-func (r *RuleTooMuchSteps) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+func (r *RuleTooMuchSteps) ValidateRule(g *Game, t *board.Turn) error {
 	expectedStepsNumber := 2
 	if g.Dice1 == g.Dice2 {
 		expectedStepsNumber = 4
@@ -205,21 +205,21 @@ func (r *RuleTooMuchSteps) ValidateRule(g *Game, c board.StickColor, t *board.Tu
 	}
 
 	if r.nextRule != nil {
-		return r.nextRule.ValidateRule(g, c, t)
+		return r.nextRule.ValidateRule(g, t)
 	}
 	return nil
 }
 
-func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, c board.StickColor, t *board.Turn) error {
+func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, t *board.Turn) error {
 	headCount := 0
-	if c == board.Black {
+	if t.StickColor == board.Black {
 		for i := range t.Moves {
 			if t.Moves[i].From == 1 {
 				headCount++
 			}
 		}
 	}
-	if c == board.White {
+	if t.StickColor == board.White {
 		for i := range t.Moves {
 			if t.Moves[i].From == 13 {
 				headCount++
@@ -231,7 +231,7 @@ func (r *RuleAttemptToGetFewSticksFromHead) ValidateRule(g *Game, c board.StickC
 	}
 
 	if r.nextRule != nil {
-		return r.nextRule.ValidateRule(g, c, t)
+		return r.nextRule.ValidateRule(g, t)
 	}
 	return nil
 }
