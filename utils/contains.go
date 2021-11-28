@@ -1,7 +1,8 @@
-
 package utils
 
-import "backgammon/domain/authdomain"
+import (
+	"backgammon/domain"
+)
 
 func Contains(s *[]string, e string) bool {
 	for i := range *s {
@@ -12,7 +13,7 @@ func Contains(s *[]string, e string) bool {
 	return false
 }
 
-func ContainsToken(s *[]authdomain.Token, e authdomain.Token) bool {
+func ContainsToken(s *[]domain.Token, e domain.Token) bool {
 	for i := range *s {
 		if (*s)[i] == e {
 			return true
@@ -21,16 +22,18 @@ func ContainsToken(s *[]authdomain.Token, e authdomain.Token) bool {
 	return false
 }
 
-func AreEqualIntSlices( sl1 []int, sl2 []int) bool {
+func AreEqualIntSlices(sl1 []int, sl2 []int) bool {
 
-	l1:=len(sl1)
-	l2:=len(sl2)
-	if l1!=l2 {
-		return false}
+	l1 := len(sl1)
+	l2 := len(sl2)
+	if l1 != l2 {
+		return false
+	}
 
-	for i:= range sl1 {
-		if sl1[i]!=sl2[i] {
-			return false}
+	for i := range sl1 {
+		if sl1[i] != sl2[i] {
+			return false
+		}
 	}
 	return true
 }

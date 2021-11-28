@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backgammon/domain/authdomain"
+	"backgammon/domain"
 	"github.com/stretchr/testify/assert"
 	"regexp"
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func TestGenerateUUID(t *testing.T) {
 	n := 10000
-	var uuid authdomain.UUID
+	var uuid domain.UUID
 	uuidRegex := "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b"
 
 	re := regexp.MustCompile(uuidRegex)
@@ -24,17 +24,16 @@ func TestGenerateUUID(t *testing.T) {
 
 func TestUUIDGenerationUniqueness(t *testing.T) {
 	n := 10000
-	var uuid authdomain.UUID
+	var uuid domain.UUID
 	var isUnique bool
 	uuids := make([]string, 0, n)
 
 	for i := 0; i < n; i++ {
 		uuid = GenerateUUID()
 
-		isUnique=!Contains(&uuids, string(uuid))
+		isUnique = !Contains(&uuids, string(uuid))
 
 		assert.True(t, isUnique)
-		uuids=append(uuids, string(uuid))
+		uuids = append(uuids, string(uuid))
 	}
 }
-

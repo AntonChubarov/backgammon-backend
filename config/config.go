@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/jbrodriguez/mlog"
 	"github.com/joho/godotenv"
 	"github.com/tkanos/gonfig"
 )
@@ -8,7 +9,7 @@ import (
 type ServerConfig struct {
 	Server   Server
 	Database DBConfig
-	Token TokenConfig
+	Token    TokenConfig
 }
 
 type Server struct {
@@ -17,15 +18,15 @@ type Server struct {
 }
 
 type DBConfig struct {
-	Host   string `env:"DB_HOST"`
-	Port       int    `env:"DB_PORT"`
+	Host     string `env:"DB_HOST"`
+	Port     int    `env:"DB_PORT"`
 	User     string `env:"DB_USER"`
 	Password string `env:"DB_PASSWORD"`
 	Name     string `env:"DB_NAME"`
 }
 
 type TokenConfig struct {
-	TokenLength int `env:"TOKEN_LENGTH"`
+	TokenLength  int    `env:"TOKEN_LENGTH"`
 	TokenSymbols string `env:"TOKEN_SYMBOLS"`
 }
 
@@ -35,32 +36,32 @@ func NewServerConfig() *ServerConfig {
 	var hostConfig Server
 	err = getConfig(&hostConfig)
 	if err != nil {
-		panic(err)
+		mlog.Fatalf("%s", err)
 	}
 
 	var dbConfig DBConfig
 	err = getConfig(&dbConfig)
 	if err != nil {
-		panic(err)
+		mlog.Fatalf("%s", err)
 	}
 
 	var tokenConfig TokenConfig
 	err = getConfig(&tokenConfig)
 	if err != nil {
-		panic(err)
+		mlog.Fatalf("%s", err)
 	}
 
 	return &ServerConfig{
-		Server: hostConfig,
-		Database:   dbConfig,
-		Token:      tokenConfig,
+		Server:   hostConfig,
+		Database: dbConfig,
+		Token:    tokenConfig,
 	}
 }
 
 func getConfig(configType interface{}) (err error) {
 	err = godotenv.Load(".env")
 	if err != nil {
-		panic(err)
+		mlog.Fatalf("%s", err)
 	}
 	return gonfig.GetConf("", configType)
 }
